@@ -25,13 +25,22 @@ export default function Login({ status, canResetPassword }) {
         <GuestLayout>
             <Head title="Log in" />
 
+            <div className="text-center mb-8">
+                <h1 className="text-2xl font-bold text-[#0d47a1]">
+                    Bienvenido a la administración de tu negocio!
+                </h1>
+                <p className="mt-2 text-sm text-gray-600">
+                    Inicia sesión para comenzar
+                </p>
+            </div>
+
             {status && (
                 <div className="mb-4 text-sm font-medium text-green-600">
                     {status}
                 </div>
             )}
 
-            <form onSubmit={submit}>
+            <form onSubmit={submit} className="max-w-md mx-auto">
                 <div>
                     <InputLabel htmlFor="email" value="Email" />
 
@@ -74,8 +83,8 @@ export default function Login({ status, canResetPassword }) {
                                 setData('remember', e.target.checked)
                             }
                         />
-                        <span className="ms-2 text-sm text-gray-600">
-                            Remember me
+                        <span className="ml-2 text-sm text-gray-600">
+                            Recordar mi contraseña
                         </span>
                     </label>
                 </div>
@@ -86,12 +95,12 @@ export default function Login({ status, canResetPassword }) {
                             href={route('password.request')}
                             className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                         >
-                            Forgot your password?
+                            ¿Olvidaste tu contraseña?
                         </Link>
                     )}
 
-                    <PrimaryButton className="ms-4" disabled={processing}>
-                        Log in
+                    <PrimaryButton className="ml-4" disabled={processing}>
+                        Iniciar sesión
                     </PrimaryButton>
                 </div>
             </form>
