@@ -11,7 +11,7 @@ export default function Register({ roles }) {
         email: '',
         password: '',
         password_confirmation: '',
-        role_id: '', // Incluye role_id en data
+        role_id: '',
     });
 
     const submit = (e) => {
@@ -75,7 +75,7 @@ export default function Register({ roles }) {
                                 </option>
                             ))
                         ) : (
-                            <option value="">No roles available</option>
+                            <option disabled value="">No roles available</option>
                         )}
                     </select>
                     <InputError message={errors.role_id} className="mt-2" />

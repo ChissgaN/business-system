@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Auth;
 
 use App\Http\Controllers\Controller;
 use App\Models\User;
-use App\Models\Roles; // Importa el modelo Role
+use App\Models\Roles;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -25,7 +25,7 @@ class RegisteredUserController extends Controller
         $roles = Roles::all();
         
         return Inertia::render('Auth/Register', [
-            'roles' => $roles, // Pasamos los roles a la vista como una prop
+            'roles' => $roles,
         ]);
     }
 
