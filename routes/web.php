@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\ProductsController;
+use App\Http\Controllers\PurchasesController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -39,6 +40,13 @@ Route::middleware(['auth'])->group(function () {
     Route::post('/products/create', [ProductsController::class, 'store'])->name('products.store');
     Route::put('/products/{product}', [ProductsController::class, 'update'])->name('products.update');
     Route::delete('/products/{product}', [ProductsController::class, 'destroy'])->name('products.destroy');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/purchase', [PurchasesController::class, 'index'])->name('purchases.index');
+    Route::post('/purchase/create', [PurchasesController::class, 'store'])->name('purchases.store');
+    Route::put('/purchase/{purchase}', [PurchasesController::class, 'update'])->name('purchases.update');
+    Route::delete('/purchase/{purchase}', [PurchasesController::class, 'destroy'])->name('purchases.destroy');
 });
 
 require __DIR__.'/auth.php';

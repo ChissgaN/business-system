@@ -139,7 +139,7 @@ export default function Products({ products }) {
                             paginator
                             rows={10}
                             responsiveLayout="scroll"
-                            header="Listado de Productos"
+                             
                         >
                             <Column field="id" header="ID" sortable />
                             <Column field="name" header="Nombre" sortable filter />
