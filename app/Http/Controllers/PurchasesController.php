@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Products;
 use App\Models\Purchases;
 use App\Models\User;
+use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
@@ -16,16 +18,18 @@ class PurchasesController extends Controller
     public function index()
     {
         try {
-            // Cargar las compras junto con la relación del usuario
             $purchases = Purchases::with('user')->get();
-        
+            $users = User::all();
+            $products = Products::all();
+
             return Inertia::render('Auth/Purchases', [
                 'purchases' => $purchases,
+                'users' => $users,
+                'products' => $products,
             ]);
         } catch (\Exception $e) {
             return Redirect::route('purchases')->with('error', 'Error al cargar las compras: ' . $e->getMessage());
         }
-        
     }
 
     /**
@@ -34,9 +38,11 @@ class PurchasesController extends Controller
     public function create()
     {
         $users = User::all();
-        
-        return Inertia::render('Auth/purchases', [
+        $products = Products::all();
+
+        return Inertia::render('Auth/Purchases', [
             'users' => $users,
+            'products' => $products,
         ]);
     }
 
@@ -44,22 +50,32 @@ class PurchasesController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-    {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
-            'document_date' => 'required|datetime,default:current',
-            'order_status' => 'required|tinyint,default:0',
-            'payment_status' => 'required|tinyint,default:0', 
-            'total' => 'required|decimal,default:0.0',
+{
+    $request->validate([
+        'user_id' => 'required|exists:users,id',
+        'document_date' => 'required|date',
+        'order_status' => 'required|integer|min:0|max:2',
+        'payment_status' => 'required|integer|min:0|max:2',
+        'total' => 'required|numeric|min:0',
+    ]);
+
+    try {
+        // Convertir el formato de la fecha al formato MySQL compatible
+        $formattedDate = Carbon::parse($request->input('document_date'))->format('Y-m-d H:i:s');
+
+        $purchase = Purchases::create([
+            'user_id' => $request->input('user_id'),
+            'document_date' => $formattedDate,
+            'order_status' => $request->input('order_status'),
+            'payment_status' => $request->input('payment_status'),
+            'total' => $request->input('total'),
         ]);
 
-        try {
-            Purchases::create($request->all());
-            return Redirect::route('purchases.index')->with('success', 'compra creado exitosamente.');
-        } catch (\Exception $e) {
-            return Redirect::back()->with('error', 'Error al crear la compra: ' . $e->getMessage());
-        }
+        return Redirect::route('purchases.index')->with('success', 'Compra creada exitosamente.');
+    } catch (\Exception $e) {
+        return Redirect::back()->with('error', 'Error al crear la compra: ' . $e->getMessage());
     }
+}
 
     /**
      * Display the specified resource.
@@ -84,10 +100,10 @@ class PurchasesController extends Controller
     {
         $request->validate([
             'user_id' => 'required|exists:users,id',
-            'document_date' => 'required|datetime,default:current',
-            'order_status' => 'required|tinyint,default:0',
-            'payment_status' => 'required|tinyint,default:0', 
-            'total' => 'required|decimal,default:0.0',
+            'document_date' => 'required|date',
+            'order_status' => 'required|integer|min:0|max:2',
+            'payment_status' => 'required|integer|min:0|max:2',
+            'total' => 'required|numeric|min:0',
         ]);
         try {
             $purchases->update($request->all());

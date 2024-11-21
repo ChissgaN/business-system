@@ -1,226 +1,172 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import { Inertia } from "@inertiajs/inertia";
 import AuthenticatedLayout from "@/Layouts/AuthenticatedLayout";
 import { Head } from "@inertiajs/react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Button } from "primereact/button";
-import { FaEdit, FaTrash, FaEye } from "react-icons/fa";
-import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
+import FourActionButtons from "@/Components/ActionButtons";
+import StorePurchases from "@/Components/Purchases/StorePurchases";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
+import StorePurchaseProduct from "@/Components/Purchases/StorePurchaseProducts";
 
-export default function Purchases({ purchases }) {
+export default function Purchases({
+    purchases = [],
+    users = [],
+    products = [],
+}) {
+    // State management
     const [visibleCreateModal, setVisibleCreateModal] = useState(false);
+    const [visibleProductsModal, setVisibleProductsModal] = useState(false);
     const [visibleEditModal, setVisibleEditModal] = useState(false);
     const [visibleDeleteModal, setVisibleDeleteModal] = useState(false);
     const [visibleViewModal, setVisibleViewModal] = useState(false);
     const [selectedPurchase, setSelectedPurchase] = useState(null);
-    const [newPurchase, setNewPurchase] = useState({
-        id: "",
-        document_date: "",
-        total: "",
-        order_status: "",
-        payment_status: "",
-        user_id: "",
-    });
+    const [purchaseProducts, setPurchaseProducts] = useState([]);
+
     const [searchTerm, setSearchTerm] = useState("");
 
-    const handleDeletePurchase = () => {
-        if (selectedPurchase) {
-            Inertia.delete(
-                route("purchases.destroy", { id: selectedPurchase.id }),
-                {
-                    onSuccess: () => {
-                        console.log("Purchase deleted successfully");
-                        setVisibleDeleteModal(false);
-                    },
-                    onError: (errors) => {
-                        console.error("Error deleting purchase:", errors);
-                    },
-                }
-            );
-        }
-    };
-
-    const handleSearchChange = (e) => {
-        setSearchTerm(e.target.value);
-    };
-
-    const editPurchase = (purchase) => {
-        setSelectedPurchase(purchase);
-        setNewPurchase({
-            id: purchase.id || "",
-            user_id: purchase.user_id || "",
-            document_date: purchase.document_date || "",
-            total: purchase.total || "",
-            order_status: purchase.order_status || 0,
-            payment_status: purchase.payment_status || 0,
+    const orderStatusOptions = [
+        { label: "No recibido", value: 0 },
+        { label: "Recibido", value: 1 },
+        { label: "Cancelado", value: 2 },
+    ];
+    const paymentStatusOptions = [
+        { label: "Por pagar", value: 0 },
+        { label: "Crédito", value: 1 },
+        { label: "Pagado", value: 2 },
+    ];
+    const receivedStatusOptions = [
+        { label: "No Recibido", value: 0 },
+        { label: "Recibido", value: 1 },
+        { label: "Cancelado", value: 2 },
+    ];
+    // Form states
+    const handleSavePurchase = (purchaseData) => {
+        Inertia.post(route("purchases.store"), purchaseData, {
+            onSuccess: () => {
+                setVisibleCreateModal(false);
+            },
         });
-        setVisibleEditModal(true);
     };
+    const actionBodyTemplate = (rowData) => {
+        const handleView = (purchase) => {
+            setSelectedPurchase(purchase);
+            setVisibleViewModal(true);
+        };
 
-    const confirmDeletePurchase = (purchase) => {
-        setSelectedPurchase(purchase);
-        setVisibleDeleteModal(true);
-    };
+        const handleProducts = (purchase) => {
+            setSelectedPurchase(purchase);
+            setVisibleProductsModal(true);
+            setPurchaseProducts([]); // Reset products
+        };
 
-    const viewPurchase = (purchase) => {
-        setSelectedPurchase(purchase);
-        setVisibleViewModal(true);
-    };
+        const handleEdit = (purchase) => {
+            setSelectedPurchase(purchase);
+            setNewPurchase({
+                user_id: purchase.user_id,
+                document_date: new Date(purchase.document_date),
+                order_status: purchase.order_status,
+                payment_status: purchase.payment_status,
+                total: purchase.total,
+            });
+            setVisibleEditModal(true);
+        };
 
-    // Filtrar compras por términos de búsqueda
-    const filteredPurchases = purchases.filter(
-        (purchase) =>
-            (purchase.id && purchase.id.toString().includes(searchTerm)) ||
-            (purchase.user_id &&
-                purchase.user_id.toString().includes(searchTerm))
-    );
+        const handleDelete = (purchase) => {
+            setSelectedPurchase(purchase);
+            setVisibleDeleteModal(true);
+        };
 
-    // Formatear fecha a DD/MM/AAAA
-    const formatDate = (date) => {
-        if (!date) return "";
-        const options = { day: "2-digit", month: "2-digit", year: "numeric" };
-        return new Date(date).toLocaleDateString("es-ES", options);
-    };
-
-    // Mapear estados de orden
-    const mapOrderStatus = (status) => {
-        switch (status) {
-            case 0:
-                return "Por recibir";
-            case 1:
-                return "Recibido";
-            case 2:
-                return "Cancelado";
-            default:
-                return "Desconocido";
-        }
-    };
-
-    const mapPaymentStatus = (status) => {
-        switch (status) {
-            case 0:
-                return "Por pagar";
-            case 1:
-                return "Crédito";
-            case 2:
-                return "Pagado";
-            default:
-                return "Desconocido";
-        }
-    };
-
-    const actionBodyTemplate = (rowData) => (
-        <div className="flex justify-center space-x-2">
-            <Button
-                icon={<FaEye />}
-                className="p-button-rounded p-button-secondary text-xl text-green-500"
-                onClick={() => viewPurchase(rowData)}
-                tooltip="View"
+        return (
+            <FourActionButtons
+                rowData={rowData}
+                onView={handleView}
+                onProducts={handleProducts}
+                onEdit={handleEdit}
+                onDelete={handleDelete}
             />
-            <Button
-                icon={<FaEdit />}
-                className="p-button-rounded p-button-info text-xl text-blue-500"
-                onClick={() => editPurchase(rowData)}
-                tooltip="Edit"
-            />
-            <Button
-                icon={<FaTrash />}
-                className="p-button-rounded p-button-danger text-xl text-red-500"
-                onClick={() => confirmDeletePurchase(rowData)}
-                tooltip="Delete"
-            />
-        </div>
-    );
+        );
+    };
 
     return (
         <AuthenticatedLayout>
             <Head title="Purchases" />
             <div className="p-6">
+                {/* Search and Create button */}
                 <div className="flex justify-between items-center mb-4">
                     <InputText
-                        placeholder="Search by Purchase ID or User ID"
+                        placeholder="Buscar por ID o Usuario"
                         value={searchTerm}
-                        onChange={handleSearchChange}
-                        className="p-inputtext w-[25%] rounded-md"
+                        onChange={(e) => setSearchTerm(e.target.value)}
+                        className="p-inputtext w-[25%]"
                     />
                     <Button
                         label="Nueva Compra"
-                        className="p-button-primary bg-[#4169E1] text-white p-2 rounded-md"
+                        icon="pi pi-plus"
                         onClick={() => setVisibleCreateModal(true)}
+                        className="p-2 rounded-md bg-[#007bff] text-white"
                     />
+                    {/* Modal para crear compras */}
+                    {visibleCreateModal && (
+                        <StorePurchases
+                            users={users}
+                            products={products}
+                            onSave={handleSavePurchase}
+                        />
+                    )}
                 </div>
+                {/* Main DataTable */}
                 <DataTable
-                    value={filteredPurchases}
-                    responsiveLayout="scroll"
+                    value={purchases}
                     paginator
                     rows={5}
                     header="Listado de Compras"
                 >
                     <Column field="id" header="ID" sortable />
-                    <Column field="user.name" header="Usuario"
-                        body={(rowData) =>
-                            rowData.user?.name || "Usuario no disponible"
-                        } sortable
-                    />
-                    <Column field="document_date" header="Fecha"
-                        body={(rowData) => formatDate(rowData.document_date)} sortable
-                    />
-                    <Column field="total" header="Total"
+                    <Column field="user.name" header="Usuario" sortable />
+                    <Column field="document_date" header="Fecha" sortable />
+                    <Column
+                        field="total"
+                        header="Total"
+                        sortable
                         body={(rowData) =>
                             `$${parseFloat(rowData.total).toFixed(2)}`
-                        } sortable
+                        }
                     />
-                    <Column field="order_status" header="Estado de la Compra"
-                        body={(rowData) => mapOrderStatus(rowData.order_status)} sortable
-                    />
-                    <Column field="payment_status" header="Estado del Pago"
+                    <Column
+                        field="order_status"
+                        header="Estado Orden"
+                        sortable
                         body={(rowData) =>
-                            mapPaymentStatus(rowData.payment_status)
-                        } sortable
+                            orderStatusOptions.find(
+                                (opt) => opt.value === rowData.order_status
+                            )?.label
+                        }
                     />
-                    <Column body={actionBodyTemplate} header="Actions" />
+                    <Column
+                        field="payment_status"
+                        header="Estado Pago"
+                        sortable
+                        body={(rowData) =>
+                            paymentStatusOptions.find(
+                                (opt) => opt.value === rowData.payment_status
+                            )?.label
+                        }
+                    />
+                    <Column header="Acciones" body={actionBodyTemplate} />
                 </DataTable>
-
-                {/* Modals */}
-                <Dialog
-                    visible={visibleCreateModal}
-                    onHide={() => setVisibleCreateModal(false)}
-                >
-                    <p>Formulario para crear nueva compra</p>
-                </Dialog>
-                <Dialog
-                    visible={visibleEditModal}
-                    onHide={() => setVisibleEditModal(false)}
-                >
-                    <p>Formulario para editar compra</p>
-                </Dialog>
-                <Dialog
-                    visible={visibleViewModal}
-                    onHide={() => setVisibleViewModal(false)}
-                >
-                    <p>Detalle de la compra seleccionada</p>
-                </Dialog>
-                <Dialog
-                    visible={visibleDeleteModal}
-                    onHide={() => setVisibleDeleteModal(false)}
-                >
-                    <p>¿Estás seguro de que quieres eliminar esta compra?</p>
-                    <Button
-                        label="Sí"
-                        onClick={handleDeletePurchase}
-                        className="p-button-danger"
+                {visibleProductsModal && (
+                    <StorePurchaseProduct
+                        visible={visibleProductsModal}
+                        onClose={() => setVisibleProductsModal(false)}
+                        purchaseId={selectedPurchase?.id}
+                        products={products}
                     />
-                    <Button
-                        label="No"
-                        onClick={() => setVisibleDeleteModal(false)}
-                        className="p-button-secondary"
-                    />
-                </Dialog>
+                )}
             </div>
         </AuthenticatedLayout>
     );

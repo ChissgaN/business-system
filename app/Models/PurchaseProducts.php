@@ -7,9 +7,10 @@ use Illuminate\Database\Eloquent\Model;
 
 class PurchaseProducts extends Model
 {
-    /** @use HasFactory<\Database\Factories\PurchaseProductsFactory> */
     use HasFactory;
 
+    protected $table = 'purchase_products';
+    
     protected $fillable = [
         'purchase_id',
         'product_id',
@@ -18,6 +19,11 @@ class PurchaseProducts extends Model
         'received',
     ];
 
+    protected $casts = [
+        'qty' => 'integer',
+        'cost' => 'decimal:2',
+        'received' => 'integer',
+    ];
     public function purchase()
     {
         return $this->belongsTo(Purchases::class);

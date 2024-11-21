@@ -16,4 +16,10 @@ class Products extends Model
         'price',
         'qty',
     ];
+
+    public function purchaseProducts()
+    {
+        return $this->hasMany(PurchaseProducts::class);
+    }
+
 }

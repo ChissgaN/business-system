@@ -22,6 +22,7 @@
     },
     "dependencies": {
         "@inertiajs/inertia": "^0.11.1",
+        "date-fns": "^4.1.0",
         "primeflex": "^3.3.1",
         "primeicons": "^7.0.0",
         "primereact": "^10.8.4",

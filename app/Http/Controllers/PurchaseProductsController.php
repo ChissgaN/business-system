@@ -5,9 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\Products;
 use App\Models\PurchaseProducts;
 use App\Models\Purchases;
+use Dotenv\Exception\ValidationException;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Log;
+
 
 class PurchaseProductsController extends Controller
 {
@@ -35,7 +39,7 @@ class PurchaseProductsController extends Controller
             // Obtener todas las compras y productos
             $purchases = Purchases::all();
             $products = Products::all();
-    
+
             // Retornar ambas variables a la vista
             return Inertia::render('Auth/purchases', [
                 'purchases' => $purchases,
@@ -54,19 +58,50 @@ class PurchaseProductsController extends Controller
     {
         $request->validate([
             'purchase_id' => 'required|exists:purchases,id',
-            'product_id' => 'required|exists:products,id',
-            'qty' => 'required|number,default:1',
-            'cost' => 'required|number,default:0.0',
-            'received' => 'required|integer,default:0', 
+            'products' => 'required|array',
+            'products.*.product_id' => 'required|exists:products,id',
+            'products.*.qty' => 'required|integer|min:1',
+            'products.*.cost' => 'required|numeric|min:0',
+            'products.*.received' => 'required|integer|min:0|max:2',
         ]);
 
-        try {
-            PurchaseProducts::create($request->all());
-            return Redirect::route('purchases.index')->with('success', 'compra creado exitosamente.');
-        } catch (\Exception $e) {
-            return Redirect::back()->with('error', 'Error al crear la compra: ' . $e->getMessage());
+        foreach ($request->products as $product) {
+            PurchaseProducts::create([
+                'purchase_id' => $request->input('purchase_id'),
+                'product_id' => $product['product_id'],
+                'qty' => $product['qty'],
+                'cost' => $product['cost'],
+                'received' => $product['received'],
+            ]);
         }
+
+        return response()->json(['success' => true, 'message' => 'Productos añadidos exitosamente'], 201);
     }
+
+
+public function bulkCreate(Request $request)
+{
+    $request->validate([
+        'purchase_id' => 'required|exists:purchases,id',
+        'products' => 'required|array',
+        'products.*.product_id' => 'required|exists:products,id',
+        'products.*.qty' => 'required|integer',
+        'products.*.cost' => 'required|numeric',
+        'products.*.received' => 'required|integer',
+    ]);
+
+    foreach ($request->products as $product) {
+        PurchaseProducts::create([
+            'purchase_id' => $request->purchase_id,
+            'product_id' => $product['product_id'],
+            'qty' => $product['qty'],
+            'cost' => $product['cost'],
+            'received' => $product['received'],
+        ]);
+    }
+
+    return response()->json(['message' => 'Productos de compra creados con éxito.'], 201);
+}
 
     /**
      * Display the specified resource.
@@ -92,16 +127,16 @@ class PurchaseProductsController extends Controller
         $request->validate([
             'purchase_id' => 'required|exists:purchases,id',
             'product_id' => 'required|exists:products,id',
-            'qty' => 'required|number,default:1',
-            'cost' => 'required|number,default:0.0',
-            'received' => 'required|integer,default:0', 
+            'qty' => 'required|numeric,default:1',
+            'cost' => 'required|numeric,default:0.0',
+            'received' => 'required|integer,default:0',
         ]);
         try {
             $purchaseProducts->update($request->all());
             return Redirect::route('purchases.index')->with('success', 'Compra actualizado exitosamente.');
-            } catch (\Exception $e) {
-                return Redirect::back()->with('error', 'Error al actualizar la compra: ' . $e->getMessage());
-            }
+        } catch (\Exception $e) {
+            return Redirect::back()->with('error', 'Error al actualizar la compra: ' . $e->getMessage());
+        }
     }
 
     /**
