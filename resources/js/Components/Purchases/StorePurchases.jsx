@@ -7,9 +7,9 @@ import { Button } from "primereact/button";
 export default function StorePurchases({ 
     users = [], 
     products = [], 
-    onSave 
+    onSave,
+    onClose
 }) {
-    // Estados locales
     const [newPurchase, setNewPurchase] = useState({
         user_id: "",
         document_date: null,
@@ -18,8 +18,6 @@ export default function StorePurchases({
         total: 0,
     });
     const [purchaseProducts, setPurchaseProducts] = useState([]);
-
-    // Opciones para dropdowns
     const orderStatusOptions = [
         { label: "No recibido", value: 0 },
         { label: "Recibido", value: 1 },
@@ -30,12 +28,6 @@ export default function StorePurchases({
         { label: "Crédito", value: 1 },
         { label: "Pagado", value: 2 },
     ];
-    const receivedStatusOptions = [
-        { label: "No Recibido", value: 0 },
-        { label: "Recibido", value: 1 },
-        { label: "Cancelado", value: 2 },
-    ];
-
     // Función para calcular el total
     const calculateTotal = () => {
         return purchaseProducts.reduce((total, item) => {
@@ -43,8 +35,6 @@ export default function StorePurchases({
             return total + (product?.price || 0) * item.qty;
         }, 0);
     };
-
-    // Función para guardar la compra
     const handleSavePurchase = () => {
         const purchaseData = {
             ...newPurchase,
@@ -60,15 +50,16 @@ export default function StorePurchases({
             total: 0,
         });
         setPurchaseProducts([]);
+        onClose();
     };
 
     return (
         <div>
-            <Dialog visible={true} header="Crear Nueva Compra" className="w-3/4">
+            <Dialog visible={true} header="Crear Nueva Compra" className="w-2/4" onHide={onClose}>
                 <div className="p-fluid">
                     {/* Datos de la compra */}
                     <div className="mb-4">
-                        <label className="block mb-2">Usuario</label>
+                        <label className="block mb-2 font-semibold text-[#191970]">Usuario</label>
                         <Dropdown
                             value={newPurchase.user_id}
                             options={users.map((user) => ({
@@ -85,7 +76,7 @@ export default function StorePurchases({
                         />
                     </div>
                     <div className="mb-4">
-                        <label className="block mb-2">Fecha</label>
+                        <label className="block mb-2 font-semibold text-[#191970]">Fecha</label>
                         <Calendar
                             value={newPurchase.document_date}
                             onChange={(e) =>
@@ -98,7 +89,7 @@ export default function StorePurchases({
                         />
                     </div>
                     <div className="mb-4">
-                        <label className="block mb-2">Estado de la Orden</label>
+                        <label className="block mb-2 font-semibold text-[#191970]">Estado de la Orden</label>
                         <Dropdown
                             value={newPurchase.order_status}
                             options={orderStatusOptions}
@@ -112,7 +103,7 @@ export default function StorePurchases({
                         />
                     </div>
                     <div className="mb-4">
-                        <label className="block mb-2">Estado del Pago</label>
+                        <label className="block mb-2 font-semibold text-[#191970]">Estado del Pago</label>
                         <Dropdown
                             value={newPurchase.payment_status}
                             options={paymentStatusOptions}
@@ -128,8 +119,8 @@ export default function StorePurchases({
                 </div>
                 {/* Productos de la compra */}
                 
-                <div className="flex justify-end mt-4">
-                    <Button label="Guardar Compra" onClick={handleSavePurchase} />
+                <div className="flex justify-center mt-4 "> 
+                    <Button label="Guardar Compra" onClick={handleSavePurchase} className="bg-[#007bff] p-2 rounded-md text-white w-1/4"/>
                 </div>
             </Dialog>
         </div>

@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Inertia } from "@inertiajs/inertia";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
@@ -57,23 +58,16 @@ export default function StorePurchaseProduct({
             alert("No hay productos para guardar. Agrega al menos uno.");
             return;
         }
-    
-        // Enviar el objeto con el purchase_id y los productos
         const payload = {
-            purchase_id: purchaseId, // Asegúrate de que purchaseId tenga un valor válido
-            products: formattedProducts // Este es el array de productos
+            purchase_id: purchaseId, 
+            products: formattedProducts 
         };
-    
-        // Crear un nuevo objeto para asegurar el orden
         const orderedPayload = {
             purchase_id: payload.purchase_id,
             products: payload.products
         };
-    
-        console.log("Payload a enviar:", orderedPayload); // Verifica el payload antes de enviar
-    
-        post(
-            "/purchase-product/bulk-create",
+        console.log("Payload a enviar:", orderedPayload);
+        Inertia.post(route("purchase-products.store"),
             orderedPayload,
             {
                 onSuccess: () => {
@@ -92,11 +86,11 @@ export default function StorePurchaseProduct({
             visible={visible}
             header="Añadir Productos"
             onHide={onClose}
-            className="p-4"
+            className="p-4 w-2/4"
         >
             <div className="p-fluid">
                 <div className="mb-4">
-                    <label className="block mb-2">Producto</label>
+                    <label className="block mb-2 font-semibold text-[#191970]">Producto</label>
                     <Dropdown
                         value={newProduct.product_id}
                         options={products.map((product) => ({
@@ -119,23 +113,20 @@ export default function StorePurchaseProduct({
                 </div>
 
                 <div className="mb-4">
-                    <label className="block mb-2">Cantidad</label>
-                    <InputText
-                        type="number"
-                        value={newProduct.qty}
-                        onChange={(e) => {
-                            const value = parseInt(e.target.value) || 1;
-                            setNewProduct({
-                                ...newProduct,
-                                qty: value > 0 ? value : 1,
+                    <label className="block mb-2 font-semibold text-[#191970]">Cantidad</label>
+                    <InputText type="number" value={newProduct.qty}
+                    onChange={(e) => {const value = e.target.value;
+                    if (value === "") {setNewProduct({...newProduct, qty: "",});
+                        } else { const parsedValue = parseInt(value);
+                            setNewProduct({...newProduct, qty: parsedValue > 0 ? parsedValue : 1,
                             });
-                        }}
-                        className="w-full"
-                    />
+                        }
+                    }}
+                    className="w-full" min={1}/>
                 </div>
 
                 <div className="mb-4">
-                    <label className="block mb-2">Precio Unitario</label>
+                    <label className="block mb-2 font-semibold text-[#191970]">Precio Unitario</label>
                     <InputText
                         value={newProduct.cost}
                         disabled
@@ -144,7 +135,7 @@ export default function StorePurchaseProduct({
                 </div>
 
                 <div className="mb-4">
-                    <label className="block mb-2">Estado de Recepción</label>
+                    <label className="block mb-2 font-semibold text-[#191970]">Estado de Recepción</label>
                     <Dropdown
                         value={newProduct.received}
                         options={receivedStatusOptions}

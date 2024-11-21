@@ -18,7 +18,6 @@ export default function Purchases({
     users = [],
     products = [],
 }) {
-    // State management
     const [visibleCreateModal, setVisibleCreateModal] = useState(false);
     const [visibleProductsModal, setVisibleProductsModal] = useState(false);
     const [visibleEditModal, setVisibleEditModal] = useState(false);
@@ -57,13 +56,11 @@ export default function Purchases({
             setSelectedPurchase(purchase);
             setVisibleViewModal(true);
         };
-
         const handleProducts = (purchase) => {
             setSelectedPurchase(purchase);
             setVisibleProductsModal(true);
             setPurchaseProducts([]); // Reset products
         };
-
         const handleEdit = (purchase) => {
             setSelectedPurchase(purchase);
             setNewPurchase({
@@ -75,12 +72,10 @@ export default function Purchases({
             });
             setVisibleEditModal(true);
         };
-
         const handleDelete = (purchase) => {
             setSelectedPurchase(purchase);
             setVisibleDeleteModal(true);
         };
-
         return (
             <FourActionButtons
                 rowData={rowData}
@@ -91,7 +86,10 @@ export default function Purchases({
             />
         );
     };
-
+    const formatDate = (dateString) => {
+        const date = new Date(dateString);
+        return date.toLocaleDateString("es-ES"); // Formato: "dd/mm/yyyy"
+    };
     return (
         <AuthenticatedLayout>
             <Head title="Purchases" />
@@ -116,19 +114,16 @@ export default function Purchases({
                             users={users}
                             products={products}
                             onSave={handleSavePurchase}
+                            onClose={() => setVisibleCreateModal(false)}
                         />
                     )}
                 </div>
                 {/* Main DataTable */}
-                <DataTable
-                    value={purchases}
-                    paginator
-                    rows={5}
-                    header="Listado de Compras"
-                >
+                <DataTable value={purchases} paginator rows={5} header="Listado de Compras"
+                rowClassName={(data, rowIndex) => (rowIndex % 2 === 0 ? 'bg-gray-800 text-white' : 'bg-gray-200')}>
                     <Column field="id" header="ID" sortable />
                     <Column field="user.name" header="Usuario" sortable />
-                    <Column field="document_date" header="Fecha" sortable />
+                    <Column field="document_date" header="Fecha" sortable body={(rowData) => formatDate(rowData.document_date)}/>
                     <Column
                         field="total"
                         header="Total"

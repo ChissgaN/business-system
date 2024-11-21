@@ -57,12 +57,12 @@ class PurchaseProductsController extends Controller
     public function store(Request $request)
     {
         $request->validate([
-            'purchase_id' => 'required|exists:purchases,id',
             'products' => 'required|array',
             'products.*.product_id' => 'required|exists:products,id',
             'products.*.qty' => 'required|integer|min:1',
             'products.*.cost' => 'required|numeric|min:0',
             'products.*.received' => 'required|integer|min:0|max:2',
+            'purchase_id' => 'required|exists:purchases,id',
         ]);
 
         foreach ($request->products as $product) {
@@ -75,33 +75,9 @@ class PurchaseProductsController extends Controller
             ]);
         }
 
-        return response()->json(['success' => true, 'message' => 'Productos añadidos exitosamente'], 201);
+        return Redirect::route('purchases.index')->with('success', 'Compra creada exitosamente.');
     }
 
-
-public function bulkCreate(Request $request)
-{
-    $request->validate([
-        'purchase_id' => 'required|exists:purchases,id',
-        'products' => 'required|array',
-        'products.*.product_id' => 'required|exists:products,id',
-        'products.*.qty' => 'required|integer',
-        'products.*.cost' => 'required|numeric',
-        'products.*.received' => 'required|integer',
-    ]);
-
-    foreach ($request->products as $product) {
-        PurchaseProducts::create([
-            'purchase_id' => $request->purchase_id,
-            'product_id' => $product['product_id'],
-            'qty' => $product['qty'],
-            'cost' => $product['cost'],
-            'received' => $product['received'],
-        ]);
-    }
-
-    return response()->json(['message' => 'Productos de compra creados con éxito.'], 201);
-}
 
     /**
      * Display the specified resource.

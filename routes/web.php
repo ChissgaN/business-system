@@ -51,14 +51,11 @@ Route::middleware('auth')->group(function () {
 });
 
 Route::middleware('auth')->group(function () {
-    Route::get('/purchase-product', [PurchaseProductsController::class, 'index'])->name('purchase-product.index');
-    Route::post('/purchase-product/create', [PurchaseProductsController::class, 'store'])->name('purchase-product.store');
-    Route::put('/purchase-product/{purchase-product}', [PurchaseProductsController::class, 'update'])->name('purchase-product.update');
-    Route::delete('/purchase-product/{purchase-product}', [PurchaseProductsController::class, 'destroy'])->name('purchase-product.destroy');
+    Route::get('/purchase-products', [PurchaseProductsController::class, 'index'])->name('purchase-products.index');
+    Route::post('/purchase-products/create', [PurchaseProductsController::class, 'store'])->name('purchase-products.store');
+    Route::put('/purchase-products/{purchase-product}', [PurchaseProductsController::class, 'update'])->name('purchase-products.update');
+    Route::delete('/purchase-products/{purchase-product}', [PurchaseProductsController::class, 'destroy'])->name('purchase-products.destroy');
 });
-
-// en routes/web.php
-Route::post('/purchase-product/bulk-create', [PurchaseProductsController::class, 'bulkCreate'])->name('purchase-product.bulk-create');
 
 require __DIR__.'/auth.php';
 
