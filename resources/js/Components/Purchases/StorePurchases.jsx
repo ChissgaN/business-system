@@ -117,8 +117,6 @@ export default function StorePurchases({
                         />
                     </div>
                 </div>
-                {/* Productos de la compra */}
-                
                 <div className="flex justify-center mt-4 "> 
                     <Button label="Guardar Compra" onClick={handleSavePurchase} className="bg-[#007bff] p-2 rounded-md text-white w-1/4"/>
                 </div>

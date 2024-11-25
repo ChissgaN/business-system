@@ -18,16 +18,28 @@ class PurchaseProductsController extends Controller
     /**
      * Display a listing of the resource.
      */
-    public function index()
+    public function index(Request $request)
     {
-        try {
-            $purchases = PurchaseProducts::all();
-            return Inertia::render('Auth/Purchases', [
-                'purchases' => $purchases,
-            ]);
-        } catch (\Exception $e) {
-            return Redirect::route('purchases')->with('error', 'Error al cargar las compras: ' . $e->getMessage());
+        $purchaseId = $request->get('purchase_id');
+
+        if (!$purchaseId) {
+            return response()->json(['error' => 'purchase_id is required'], 400);
         }
+
+        $purchase = Purchases::with('user')->find($purchaseId);
+
+        if (!$purchase) {
+            return response()->json(['error' => 'Purchase not found'], 404);
+        }
+
+        $purchaseProducts = PurchaseProducts::where('purchase_id', $purchaseId)
+            ->with('product') // Incluye los detalles del producto asociado
+            ->get();
+
+        return response()->json([
+            'purchase' => $purchase,
+            'purchaseProducts' => $purchaseProducts,
+        ]);
     }
 
     /**

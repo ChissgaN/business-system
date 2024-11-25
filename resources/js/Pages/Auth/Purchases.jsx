@@ -8,10 +8,12 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import FourActionButtons from "@/Components/ActionButtons";
 import StorePurchases from "@/Components/Purchases/StorePurchases";
+import axios from "axios";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import StorePurchaseProduct from "@/Components/Purchases/StorePurchaseProducts";
+import BillsPurchasesProducts from "@/Components/Purchases/BillsPurchasesProducts";
 
 export default function Purchases({
     purchases = [],
@@ -53,9 +55,19 @@ export default function Purchases({
     };
     const actionBodyTemplate = (rowData) => {
         const handleView = (purchase) => {
-            setSelectedPurchase(purchase);
-            setVisibleViewModal(true);
+            axios
+                .get(route("purchase-products.index", { purchase_id: purchase.id }))
+                .then((response) => {
+                    const { purchase, purchaseProducts } = response.data;
+                    setSelectedPurchase(purchase); // Detalles de la compra
+                    setPurchaseProducts(purchaseProducts); // Productos asociados
+                    setVisibleViewModal(true);
+                })
+                .catch((error) => {
+                    console.error("Error al cargar los datos:", error);
+                });
         };
+        
         const handleProducts = (purchase) => {
             setSelectedPurchase(purchase);
             setVisibleProductsModal(true);
@@ -117,10 +129,19 @@ export default function Purchases({
                             onClose={() => setVisibleCreateModal(false)}
                         />
                     )}
+                    {visibleViewModal && (
+                        <BillsPurchasesProducts
+                            visible={visibleViewModal}
+                            onHide={() => setVisibleViewModal(false)}
+                            purchase={selectedPurchase}
+                            purchaseProducts={purchaseProducts}
+                        />
+                    )}
+
                 </div>
                 {/* Main DataTable */}
                 <DataTable value={purchases} paginator rows={5} header="Listado de Compras"
-                rowClassName={(data, rowIndex) => (rowIndex % 2 === 0 ? 'bg-gray-800 text-white' : 'bg-gray-200')}>
+                rowClassName={(rowData) => (rowData.id % 2 === 0 ? 'bg-gray-800 text-white' : 'bg-gray-400 text-gray-700')}>
                     <Column field="id" header="ID" sortable />
                     <Column field="user.name" header="Usuario" sortable />
                     <Column field="document_date" header="Fecha" sortable body={(rowData) => formatDate(rowData.document_date)}/>

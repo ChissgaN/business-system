@@ -12,7 +12,7 @@ export default function FourActionButtons({ rowData, onView, onProducts, onEdit,
         <div className="flex space-x-2">
             <Button
                 icon={<FaEye />}
-                className="p-button-rounded p-button-info text-green-500"
+                className="p-button-rounded p-button-info text-green-700"
                 onClick={handleView}
             />
             <Button
