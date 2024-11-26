@@ -3,7 +3,6 @@ import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-import Products from "@/Pages/Auth/Products";
 
 const BillsPurchasesProducts = ({
     visible,

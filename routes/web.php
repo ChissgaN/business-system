@@ -46,7 +46,7 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/purchase', [PurchasesController::class, 'index'])->name('purchases.index');
     Route::post('/purchase/create', [PurchasesController::class, 'store'])->name('purchases.store');
-     
+    Route::put('/purchase/{purchase}', [PurchasesController::class, 'update'])->name('purchases.update');
     Route::delete('/purchase/{purchase}', [PurchasesController::class, 'destroy'])->name('purchases.destroy');
 });
 

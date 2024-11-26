@@ -14,6 +14,7 @@ import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import StorePurchaseProduct from "@/Components/Purchases/StorePurchaseProducts";
 import BillsPurchasesProducts from "@/Components/Purchases/BillsPurchasesProducts";
+import EditPurchasesProducts from "@/Components/Purchases/EditPurchasesProducts";
 
 export default function Purchases({
     purchases = [],
@@ -45,14 +46,7 @@ export default function Purchases({
         { label: "Recibido", value: 1 },
         { label: "Cancelado", value: 2 },
     ];
-    // Form states
-    const handleSavePurchase = (purchaseData) => {
-        Inertia.post(route("purchases.store"), purchaseData, {
-            onSuccess: () => {
-                setVisibleCreateModal(false);
-            },
-        });
-    };
+    
     const actionBodyTemplate = (rowData) => {
         const handleView = (purchase) => {
             axios
@@ -67,22 +61,29 @@ export default function Purchases({
                     console.error("Error al cargar los datos:", error);
                 });
         };
-        
+        // Form states
+        const handleSavePurchase = (purchaseData) => {
+            Inertia.post(route("purchases.store"), purchaseData, {
+                onSuccess: () => {
+                    setVisibleCreateModal(false);
+                },
+            });
+        };
         const handleProducts = (purchase) => {
             setSelectedPurchase(purchase);
             setVisibleProductsModal(true);
             setPurchaseProducts([]); // Reset products
         };
         const handleEdit = (purchase) => {
-            setSelectedPurchase(purchase);
-            setNewPurchase({
+            setSelectedPurchase(purchase); // Asignar la compra seleccionada
+            setPurchaseProducts({
                 user_id: purchase.user_id,
                 document_date: new Date(purchase.document_date),
                 order_status: purchase.order_status,
                 payment_status: purchase.payment_status,
                 total: purchase.total,
             });
-            setVisibleEditModal(true);
+            setVisibleEditModal(true); // Mostrar modal de edición
         };
         const handleDelete = (purchase) => {
             setSelectedPurchase(purchase);
@@ -137,6 +138,15 @@ export default function Purchases({
                             purchaseProducts={purchaseProducts}
                         />
                     )}
+                    {visibleEditModal && (
+                        <EditPurchasesProducts
+                            visible={visibleEditModal} // Estado del modal
+                            onHide={() => setVisibleEditModal(false)} // Función para cerrar el modal
+                            purchase={selectedPurchase} // Compra seleccionada
+                            purchaseProducts={purchaseProducts.products} // Productos de la compra seleccionada
+                        />
+                    )}
+
 
                 </div>
                 {/* Main DataTable */}
