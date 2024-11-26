@@ -58,7 +58,8 @@ export default function StorePurchases({
             <Dialog visible={true} header="Crear Nueva Compra" className="w-2/4" onHide={onClose}>
                 <div className="p-fluid">
                     {/* Datos de la compra */}
-                    <div className="mb-4">
+                    <section className="flex justify-around mb-4">
+                    <div className="mb-4 text-center">
                         <label className="block mb-2 font-semibold text-[#191970]">Usuario</label>
                         <Dropdown
                             value={newPurchase.user_id}
@@ -75,7 +76,7 @@ export default function StorePurchases({
                             placeholder="Seleccione un Usuario"
                         />
                     </div>
-                    <div className="mb-4">
+                    <div className="mb-4 text-center">
                         <label className="block mb-2 font-semibold text-[#191970]">Fecha</label>
                         <Calendar
                             value={newPurchase.document_date}
@@ -88,7 +89,9 @@ export default function StorePurchases({
                             showIcon
                         />
                     </div>
-                    <div className="mb-4">
+                    </section>
+                    <section className="flex justify-around mb-4"> 
+                    <div className="mb-4 text-center">
                         <label className="block mb-2 font-semibold text-[#191970]">Estado de la Orden</label>
                         <Dropdown
                             value={newPurchase.order_status}
@@ -102,7 +105,7 @@ export default function StorePurchases({
                             placeholder="Seleccione un Estado"
                         />
                     </div>
-                    <div className="mb-4">
+                    <div className="mb-4 text-center">
                         <label className="block mb-2 font-semibold text-[#191970]">Estado del Pago</label>
                         <Dropdown
                             value={newPurchase.payment_status}
@@ -116,6 +119,7 @@ export default function StorePurchases({
                             placeholder="Seleccione un Estado"
                         />
                     </div>
+                </section>
                 </div>
                 <div className="flex justify-center mt-4 "> 
                     <Button label="Guardar Compra" onClick={handleSavePurchase} className="bg-[#007bff] p-2 rounded-md text-white w-1/4"/>

@@ -60,7 +60,6 @@ class PurchasesController extends Controller
     ]);
 
     try {
-        // Convertir el formato de la fecha al formato MySQL compatible
         $formattedDate = Carbon::parse($request->input('document_date'))->format('Y-m-d H:i:s');
 
         $purchase = Purchases::create([

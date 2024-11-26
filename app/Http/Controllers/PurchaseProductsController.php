@@ -21,21 +21,16 @@ class PurchaseProductsController extends Controller
     public function index(Request $request)
     {
         $purchaseId = $request->get('purchase_id');
-
         if (!$purchaseId) {
             return response()->json(['error' => 'purchase_id is required'], 400);
         }
-
         $purchase = Purchases::with('user')->find($purchaseId);
-
         if (!$purchase) {
             return response()->json(['error' => 'Purchase not found'], 404);
         }
-
         $purchaseProducts = PurchaseProducts::where('purchase_id', $purchaseId)
             ->with('product') // Incluye los detalles del producto asociado
             ->get();
-
         return response()->json([
             'purchase' => $purchase,
             'purchaseProducts' => $purchaseProducts,
@@ -51,7 +46,6 @@ class PurchaseProductsController extends Controller
             // Obtener todas las compras y productos
             $purchases = Purchases::all();
             $products = Products::all();
-
             // Retornar ambas variables a la vista
             return Inertia::render('Auth/purchases', [
                 'purchases' => $purchases,
@@ -77,18 +71,38 @@ class PurchaseProductsController extends Controller
             'purchase_id' => 'required|exists:purchases,id',
         ]);
 
-        foreach ($request->products as $product) {
-            PurchaseProducts::create([
-                'purchase_id' => $request->input('purchase_id'),
-                'product_id' => $product['product_id'],
-                'qty' => $product['qty'],
-                'cost' => $product['cost'],
-                'received' => $product['received'],
-            ]);
-        }
+        DB::beginTransaction(); // Iniciar transacción para asegurar consistencia de datos
 
-        return Redirect::route('purchases.index')->with('success', 'Compra creada exitosamente.');
+        try {
+            $totalToAdd = 0; // Variable para acumular el total a sumar
+            foreach ($request->products as $product) {
+                // Crear el registro en PurchaseProducts
+                PurchaseProducts::create([
+                    'purchase_id' => $request->input('purchase_id'),
+                    'product_id' => $product['product_id'],
+                    'qty' => $product['qty'],
+                    'cost' => $product['cost'],
+                    'received' => $product['received'],
+                ]);
+
+                // Calcular el costo total del producto
+                $totalToAdd += $product['qty'] * $product['cost'];
+            }
+
+            // Actualizar el total en la tabla Purchases
+            $purchase = Purchases::find($request->input('purchase_id'));
+            $purchase->total += $totalToAdd; // Sumar el nuevo total
+            $purchase->save();
+
+            DB::commit(); // Confirmar transacción
+
+            return Redirect::route('purchases.index')->with('success', 'Productos añadidos y total actualizado exitosamente.');
+        } catch (\Exception $e) {
+            DB::rollBack(); // Revertir transacción en caso de error
+            return Redirect::back()->with('error', 'Error al agregar productos: ' . $e->getMessage());
+        }
     }
+
 
 
     /**
