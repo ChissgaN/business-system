@@ -140,10 +140,11 @@ export default function Purchases({
                     )}
                     {visibleEditModal && (
                         <EditPurchasesProducts
-                            visible={visibleEditModal} // Estado del modal
-                            onHide={() => setVisibleEditModal(false)} // Función para cerrar el modal
-                            purchase={selectedPurchase} // Compra seleccionada
-                            purchaseProducts={purchaseProducts.products} // Productos de la compra seleccionada
+                            visible={visibleEditModal} 
+                            onHide={() => setVisibleEditModal(false)} 
+                            purchase={selectedPurchase} 
+                            purchaseProducts={purchaseProducts.products} 
+                            users={users}
                         />
                     )}
 

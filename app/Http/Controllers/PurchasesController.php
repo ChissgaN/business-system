@@ -9,6 +9,8 @@ use Carbon\Carbon;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
+use Illuminate\Support\Facades\Log;
+
 
 class PurchasesController extends Controller
 {
@@ -50,31 +52,31 @@ class PurchasesController extends Controller
      * Store a newly created resource in storage.
      */
     public function store(Request $request)
-{
-    $request->validate([
-        'user_id' => 'required|exists:users,id',
-        'document_date' => 'required|date',
-        'order_status' => 'required|integer|min:0|max:2',
-        'payment_status' => 'required|integer|min:0|max:2',
-        'total' => 'required|numeric|min:0',
-    ]);
-
-    try {
-        $formattedDate = Carbon::parse($request->input('document_date'))->format('Y-m-d H:i:s');
-
-        $purchase = Purchases::create([
-            'user_id' => $request->input('user_id'),
-            'document_date' => $formattedDate,
-            'order_status' => $request->input('order_status'),
-            'payment_status' => $request->input('payment_status'),
-            'total' => $request->input('total'),
+    {
+        $request->validate([
+            'user_id' => 'required|exists:users,id',
+            'document_date' => 'required|date',
+            'order_status' => 'required|integer|min:0|max:2',
+            'payment_status' => 'required|integer|min:0|max:2',
+            'total' => 'required|numeric|min:0',
         ]);
 
-        return Redirect::route('purchases.index')->with('success', 'Compra creada exitosamente.');
-    } catch (\Exception $e) {
-        return Redirect::back()->with('error', 'Error al crear la compra: ' . $e->getMessage());
+        try {
+            $formattedDate = Carbon::parse($request->input('document_date'))->format('Y-m-d H:i:s');
+
+            $purchase = Purchases::create([
+                'user_id' => $request->input('user_id'),
+                'document_date' => $formattedDate,
+                'order_status' => $request->input('order_status'),
+                'payment_status' => $request->input('payment_status'),
+                'total' => $request->input('total'),
+            ]);
+
+            return Redirect::route('purchases.index')->with('success', 'Compra creada exitosamente.');
+        } catch (\Exception $e) {
+            return Redirect::back()->with('error', 'Error al crear la compra: ' . $e->getMessage());
+        }
     }
-}
 
     /**
      * Display the specified resource.
@@ -95,22 +97,20 @@ class PurchasesController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, Purchases $purchases)
+    public function update(Request $request, $id)
     {
-        $request->validate([
-            'user_id' => 'required|exists:users,id',
+        $validatedData = $request->validate([
+            'user_id' => 'required|integer',
             'document_date' => 'required|date',
-            'order_status' => 'required|integer|min:0|max:2',
-            'payment_status' => 'required|integer|min:0|max:2',
-            'total' => 'required|numeric|min:0',
+            'order_status' => 'required|integer',
+            'payment_status' => 'required|integer',
+            'total' => 'required|numeric',
         ]);
-        try {
-            $purchases->update($request->all());
-            return Redirect::route('purchases.index')->with('success', 'Compra actualizado exitosamente.');
-        } catch (\Exception $e) {
-            return Redirect::back()->with('error', 'Error al actualizar la compra: ' . $e->getMessage());
-        }
+        $purchase = Purchases::findOrFail($id);
+        $purchase->update($validatedData);
+        return Redirect::route('purchases.index')->with('success', 'Compra editada exitosamente.');
     }
+
 
     /**
      * Remove the specified resource from storage.

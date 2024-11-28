@@ -6,23 +6,27 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
-import { useForm } from "@inertiajs/react";
 import axios from "axios";
-
-const EditPurchasesProducts = ({ visible, onHide, purchase }) => {
+const EditPurchasesProducts = ({ visible, onHide, purchase, users }) => {
     const [editedPurchase, setEditedPurchase] = useState({ ...purchase });
     const [editedProducts, setEditedProducts] = useState([]);
     const [loading, setLoading] = useState(false);
-
+    const receivedStatusOptions = [
+        { label: "No Recibido", value: 0 },
+        { label: "Recibido", value: 1 },
+        { label: "Cancelado", value: 2 },
+    ];
+    const handleProductUpdate = (updatedProduct) => {
+        const updatedProducts = editedProducts.map((product) =>
+            product.id === updatedProduct.id ? updatedProduct : product
+        );
+        setEditedProducts(updatedProducts);
+        setSelectedProduct(null);
+    };
     useEffect(() => {
         if (purchase?.id) {
             setLoading(true);
-            axios
-                .get(
-                    route("purchase-products.index", {
-                        purchase_id: purchase.id,
-                    })
-                )
+            axios.get(route("purchase-products.index", {purchase_id: purchase.id,}))
                 .then((response) => {
                     setEditedProducts(response.data.purchaseProducts || []);
                 })
@@ -41,71 +45,66 @@ const EditPurchasesProducts = ({ visible, onHide, purchase }) => {
             });
         }
     }, [purchase]);
+    const handleSavePurchase = () => {
+        const backendDate = `${editedPurchase.document_date} 00:00:00`;
+        const total = calculateTotal();
+        const purchasePayload = {
+            user_id: editedPurchase.user_id,  // Enviar el ID del usuario
+            document_date: backendDate,        // Fecha en formato correcto
+            order_status: editedPurchase.order_status,  // 0, 1 o 2
+            payment_status: editedPurchase.payment_status, // 0, 1 o 2
+            total: parseFloat(total.toFixed(2))     // Total calculado, formateado a 2 decimales
+        };
+        console.log("Enviando compra al backend:", purchasePayload);
+        Inertia.put(
+            route("purchases.update", { purchase: purchase.id }),
+            purchasePayload,
+            {
+                onSuccess: () => {
+                    alert("Compra actualizada exitosamente.");
+                    onHide();
+                },
+                onError: (errors) => {
+                    console.error("Errores al actualizar la compra:", errors);
+                },
+            }
+        );
+    };
     const calculateTotal = () => {
         return editedProducts.reduce(
             (sum, product) => sum + (product.qty || 0) * (product.cost || 0),
             0
         );
-    };
-    const receivedStatusOptions = [
-        { label: "No Recibido", value: 0 },
-        { label: "Recibido", value: 1 },
-        { label: "Cancelado", value: 2 },
-    ];
-
-    const handleSavePurchase = () => {
-        const backendDate = `${editedPurchase.document_date} 00:00:00`;
-        const purchasePayload = {
-            ...editedPurchase,
-            document_date: backendDate,
-        };
-        Inertia.put(route("purchases.update", { purchase: purchase.id }), {
-            data: purchasePayload,
-            onSuccess: () => {
-                alert("Compra actualizada exitosamente.");
-                onHide();
-            },
-            onError: (errors) => console.error(errors),
-        });
-    };
-    const handleProductUpdate = (updatedProduct) => {
-        const updatedProducts = editedProducts.map((product) =>
-            product.id === updatedProduct.id ? updatedProduct : product
-        );
-        setEditedProducts(updatedProducts);
-        setSelectedProduct(null);
-    };
-
+    }; 
     const handleSaveProducts = () => {
-        if (!editedProducts || editedProducts.length === 0) {
+        if (editedProducts.length === 0) {
             alert("No hay productos para actualizar.");
             return;
         }
-        // Preparar los datos para enviar
+    
         const dataToUpdate = editedProducts.map((product) => ({
             id: product.id,
-            qty: product.qty,
-            cost: product.cost,
-            received: product.received,
-            product_id: product.product_id,
+            qty: product.qty, // Cantidad del producto
+            cost: product.cost, // Costo unitario
+            received: product.received, // Estado de recepción (0, 1, 2)
+            product_id: product.product_id, // ID del producto
         }));
+    
+        console.log("Enviando productos al backend:", dataToUpdate);
+    
         Inertia.put(
             route("purchase-products.update", { purchase_id: purchase.id }),
+            { products: dataToUpdate },
             {
-                data: { products: dataToUpdate },
                 onSuccess: () => {
                     alert("Productos actualizados exitosamente.");
-                    console.log("Productos actualizados:", dataToUpdate);
+                    onHide();
                 },
                 onError: (errors) => {
-                    console.error(
-                        "Errores al actualizar los productos:",
-                        errors
-                    );
+                    console.error("Errores al actualizar los productos:", errors);
                 },
             }
-        );
-        onHide();
+        );    
     };
     return (
         <Dialog
@@ -118,6 +117,34 @@ const EditPurchasesProducts = ({ visible, onHide, purchase }) => {
             <section className="mb-4">
                 <div className="p-fluid">
                     <section className="flex justify-around mb-4 text-center items-center">
+                        <div>
+                            <label className="block font-bold mt-4 mb-2 text-[#191970]">ID de la Compra</label>
+                            <InputText
+                                type="text"
+                                value={editedPurchase.id}
+                                disabled
+                                className="w-3/4 border-2 border-gray-400 rounded-md"
+                            />
+                        </div>
+                        <div>
+                            <label className="block font-bold mt-4 mb-2 text-[#191970]">
+                                Usuario
+                            </label>
+                            <Dropdown
+                                value={editedPurchase.user_id}
+                                options={users.map((user) => ({
+                                    label: user.name,
+                                    value: user.id,
+                                }))}
+                                onChange={(e) =>
+                                    setEditedPurchase({
+                                        ...editedPurchase,
+                                        user_id: e.value,
+                                    })
+                                }
+                                className="w-full border-2 border-gray-400 rounded-md"
+                            />
+                        </div>
                         <div>
                             <label className="block font-bold mt-4 mb-2 text-[#191970]">
                                 Fecha
@@ -177,7 +204,6 @@ const EditPurchasesProducts = ({ visible, onHide, purchase }) => {
                     </section>
                 </div>
             </section>
-
             {/* Tabla de Productos */}
             <section>
                 <DataTable
@@ -259,9 +285,8 @@ const EditPurchasesProducts = ({ visible, onHide, purchase }) => {
                     Total: ${calculateTotal().toFixed(2)}
                 </div>
             </section>
-
             {/* Botones */}
-            <section className="flex justify-between mt-4">
+            <section className="flex justify-around mt-4">
                 <Button
                     label="Guardar Compra"
                     icon="pi pi-save"
@@ -280,5 +305,4 @@ const EditPurchasesProducts = ({ visible, onHide, purchase }) => {
         </Dialog>
     );
 };
-
 export default EditPurchasesProducts;

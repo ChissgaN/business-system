@@ -93,9 +93,7 @@ class PurchaseProductsController extends Controller
             $purchase = Purchases::find($request->input('purchase_id'));
             $purchase->total += $totalToAdd; // Sumar el nuevo total
             $purchase->save();
-
             DB::commit(); // Confirmar transacción
-
             return Redirect::route('purchases.index')->with('success', 'Productos añadidos y total actualizado exitosamente.');
         } catch (\Exception $e) {
             DB::rollBack(); // Revertir transacción en caso de error
@@ -124,22 +122,51 @@ class PurchaseProductsController extends Controller
     /**
      * Update the specified resource in storage.
      */
-    public function update(Request $request, PurchaseProducts $purchaseProducts)
-    {
-        $request->validate([
-            'purchase_id' => 'required|exists:purchases,id',
-            'product_id' => 'required|exists:products,id',
-            'qty' => 'required|numeric,default:1',
-            'cost' => 'required|numeric,default:0.0',
-            'received' => 'required|integer,default:0',
-        ]);
-        try {
-            $purchaseProducts->update($request->all());
-            return Redirect::route('purchases.index')->with('success', 'Compra actualizado exitosamente.');
-        } catch (\Exception $e) {
-            return Redirect::back()->with('error', 'Error al actualizar la compra: ' . $e->getMessage());
+    public function update(Request $request)
+{
+    $request->validate([
+        'purchase_id' => 'required|exists:purchases,id',
+        'data.products' => 'required|array',
+        'data.products.*.id' => 'required|exists:purchase_products,id',
+        'data.products.*.qty' => 'required|numeric|min:0',
+        'data.products.*.cost' => 'required|numeric|min:0',
+        'data.products.*.received' => 'required|integer|min:0|max:2',
+    ]);
+
+    DB::beginTransaction();
+    try {
+        $totalToUpdate = 0;
+        foreach ($request->input('data.products') as $productData) {
+            $purchaseProduct = PurchaseProducts::findOrFail($productData['id']);
+            
+            // Calcular diferencia para ajustar total de la compra
+            $oldSubtotal = $purchaseProduct->qty * $purchaseProduct->cost;
+            $newSubtotal = $productData['qty'] * $productData['cost'];
+            $totalToUpdate += $newSubtotal - $oldSubtotal;
+
+            $purchaseProduct->update([
+                'qty' => $productData['qty'],
+                'cost' => $productData['cost'],
+                'received' => $productData['received']
+            ]);
         }
+
+        // Actualizar total de la compra
+        $purchase = Purchases::findOrFail($request->input('purchase_id'));
+        $purchase->total += $totalToUpdate;
+        $purchase->save();
+
+        DB::commit();
+
+        return response()->json([
+            'message' => 'Productos actualizados exitosamente',
+            'total' => $purchase->total
+        ]);
+    } catch (\Exception $e) {
+        DB::rollBack();
+        return response()->json(['error' => $e->getMessage()], 500);
     }
+}
 
     /**
      * Remove the specified resource from storage.
