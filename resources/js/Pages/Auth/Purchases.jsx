@@ -14,7 +14,7 @@ import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import StorePurchaseProduct from "@/Components/Purchases/StorePurchaseProducts";
 import BillsPurchasesProducts from "@/Components/Purchases/BillsPurchasesProducts";
-import EditPurchasesProducts from "@/Components/Purchases/EditPurchasesProducts";
+import EditPurchases from "@/Components/Purchases/EditPurchases";
 
 export default function Purchases({
     purchases = [],
@@ -28,9 +28,7 @@ export default function Purchases({
     const [visibleViewModal, setVisibleViewModal] = useState(false);
     const [selectedPurchase, setSelectedPurchase] = useState(null);
     const [purchaseProducts, setPurchaseProducts] = useState([]);
-
     const [searchTerm, setSearchTerm] = useState("");
-
     const orderStatusOptions = [
         { label: "No recibido", value: 0 },
         { label: "Recibido", value: 1 },
@@ -46,7 +44,13 @@ export default function Purchases({
         { label: "Recibido", value: 1 },
         { label: "Cancelado", value: 2 },
     ];
-    
+    const handleSavePurchase = (purchaseData) => {
+        Inertia.post(route("purchases.store"), purchaseData, {
+            onSuccess: () => {
+                setVisibleCreateModal(false);
+            },
+        });
+    };
     const actionBodyTemplate = (rowData) => {
         const handleView = (purchase) => {
             axios
@@ -62,13 +66,7 @@ export default function Purchases({
                 });
         };
         // Form states
-        const handleSavePurchase = (purchaseData) => {
-            Inertia.post(route("purchases.store"), purchaseData, {
-                onSuccess: () => {
-                    setVisibleCreateModal(false);
-                },
-            });
-        };
+        
         const handleProducts = (purchase) => {
             setSelectedPurchase(purchase);
             setVisibleProductsModal(true);
@@ -86,8 +84,14 @@ export default function Purchases({
             setVisibleEditModal(true); // Mostrar modal de edición
         };
         const handleDelete = (purchase) => {
-            setSelectedPurchase(purchase);
-            setVisibleDeleteModal(true);
+            Inertia.delete(route("purchases.destroy", { purchase: purchase.id }), {
+                onSuccess: () => {
+                    console.log("Compra eliminada exitosamente");
+                },
+                onError: (errors) => {
+                    console.error("Error al eliminar la compra:", errors);
+                },
+            });
         };
         return (
             <FourActionButtons
@@ -139,7 +143,7 @@ export default function Purchases({
                         />
                     )}
                     {visibleEditModal && (
-                        <EditPurchasesProducts
+                        <EditPurchases
                             visible={visibleEditModal} 
                             onHide={() => setVisibleEditModal(false)} 
                             purchase={selectedPurchase} 
@@ -147,8 +151,6 @@ export default function Purchases({
                             users={users}
                         />
                     )}
-
-
                 </div>
                 {/* Main DataTable */}
                 <DataTable value={purchases} paginator rows={5} header="Listado de Compras"

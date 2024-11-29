@@ -115,10 +115,10 @@ class PurchasesController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Purchases $purchases)
+    public function destroy(Purchases $purchase)
     {
         try {
-            $purchases->delete();
+            $purchase->delete();
             return Redirect::route('purchases.index')->with('success', 'Compra eliminada exitosamente.');
         } catch (\Exception $e) {
             return Redirect::back()->with('error', 'Error al eliminar la compra: ' . $e->getMessage());
