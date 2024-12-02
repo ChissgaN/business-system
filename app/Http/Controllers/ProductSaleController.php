@@ -3,35 +3,34 @@
 namespace App\Http\Controllers;
 
 use App\Models\Products;
-use App\Models\PurchaseProducts;
-use App\Models\Purchases;
+use App\Models\ProductSale;
+use App\Models\Sales;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Redirect;
 use Inertia\Inertia;
 
-
-class PurchaseProductsController extends Controller
+class ProductSaleController extends Controller
 {
     /**
      * Display a listing of the resource.
      */
     public function index(Request $request)
     {
-        $purchaseId = $request->get('purchase_id');
-        if (!$purchaseId) {
+        $saleId = $request->get('purchase_id');
+        if (!$saleId) {
             return response()->json(['error' => 'purchase_id is required'], 400);
         }
-        $purchase = Purchases::with('user')->find($purchaseId);
-        if (!$purchase) {
-            return response()->json(['error' => 'Purchase not found'], 404);
+        $sale = Sales::with('user')->find($saleId);
+        if (!$sale) {
+            return response()->json(['error' => 'Sales not found'], 404);
         }
-        $purchaseProducts = PurchaseProducts::where('purchase_id', $purchaseId)
+        $saleProducts = ProductSale::where('purchase_id', $saleId)
             ->with('product') // Incluye los detalles del producto asociado
             ->get();
         return response()->json([
-            'purchase' => $purchase,
-            'purchaseProducts' => $purchaseProducts,
+            'sale' => $sale,
+            'saleProducts' => $saleProducts,
         ]);
     }
 
@@ -42,18 +41,17 @@ class PurchaseProductsController extends Controller
     {
         try {
             // Obtener todas las compras y productos
-            $purchases = Purchases::all();
+            $sales = Sales::all();
             $products = Products::all();
             // Retornar ambas variables a la vista
-            return Inertia::render('Auth/purchases', [
-                'purchases' => $purchases,
+            return Inertia::render('Auth/sales', [
+                'sales' => $sales,
                 'products' => $products,
             ]);
         } catch (\Exception $e) {
             return Redirect::back()->with('error', 'Error al cargar datos: ' . $e->getMessage());
         }
     }
-
 
     /**
      * Store a newly created resource in storage.
@@ -75,7 +73,7 @@ class PurchaseProductsController extends Controller
             $totalToAdd = 0; // Variable para acumular el total a sumar
             foreach ($request->products as $product) {
                 // Crear el registro en PurchaseProducts
-                PurchaseProducts::create([
+                ProductSale::create([
                     'purchase_id' => $request->input('purchase_id'),
                     'product_id' => $product['product_id'],
                     'qty' => $product['qty'],
@@ -88,23 +86,21 @@ class PurchaseProductsController extends Controller
             }
 
             // Actualizar el total en la tabla Purchases
-            $purchase = Purchases::find($request->input('purchase_id'));
-            $purchase->total += $totalToAdd; // Sumar el nuevo total
-            $purchase->save();
+            $sale = Sales::find($request->input('sale_id'));
+            $sale->total += $totalToAdd; // Sumar el nuevo total
+            $sale->save();
             DB::commit(); // Confirmar transacción
-            return Redirect::route('purchases.index')->with('success', 'Productos añadidos y total actualizado exitosamente.');
+            return Redirect::route('sales.index')->with('success', 'Productos añadidos y total actualizado exitosamente.');
         } catch (\Exception $e) {
             DB::rollBack(); // Revertir transacción en caso de error
             return Redirect::back()->with('error', 'Error al agregar productos: ' . $e->getMessage());
         }
     }
 
-
-
     /**
      * Display the specified resource.
      */
-    public function show(PurchaseProducts $purchaseProducts)
+    public function show(ProductSale $product_sale)
     {
         //
     }
@@ -112,7 +108,7 @@ class PurchaseProductsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(PurchaseProducts $purchaseProducts)
+    public function edit(ProductSale $product_sale)
     {
         //
     }
@@ -126,23 +122,21 @@ class PurchaseProductsController extends Controller
             'qty' => 'required|integer',
             'received' => 'required|integer',
         ]);
-        $purchase = PurchaseProducts::findOrFail($id);
+        $purchase = ProductSale::findOrFail($id);
         $purchase->update($validatedData);
-        return Redirect::route('purchases.index')->with('success', 'Compra editada exitosamente.');
+        return Redirect::route('sales.index')->with('success', 'Venta editada exitosamente.');
     }
-
 
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(PurchaseProducts $purchaseProduct) 
-{
-    try {
-        $purchaseProduct->delete();
-        return Redirect::route('purchases.index')->with('success', 'Producto de compra eliminado exitosamente.');
-    } catch (\Exception $e) {
-        return Redirect::back()->with('error', 'Error al eliminar el producto de una compra: ' . $e->getMessage());
+    public function destroy(ProductSale $productSale)
+    {
+        try {
+            $productSale->delete();
+            return Redirect::route('sales.index')->with('success', 'Producto de venta eliminado exitosamente.');
+        } catch (\Exception $e) {
+            return Redirect::back()->with('error', 'Error al eliminar el producto en una venta: ' . $e->getMessage());
+        }
     }
-}
-
 }

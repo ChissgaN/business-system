@@ -2,9 +2,11 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\ProductSaleController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\PurchaseProductsController;
 use App\Http\Controllers\PurchasesController;
+use App\Http\Controllers\SalesController;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\Facades\Route;
 use Inertia\Inertia;
@@ -58,5 +60,18 @@ Route::middleware('auth')->group(function () {
     ->name('purchase-products.destroy');
 });
 
+Route::middleware('auth')->group(function () {
+    Route::get('/sales', [SalesController::class, 'index'])->name('sales.index');
+    Route::post('/sales/create', [SalesController::class, 'create'])->name('sales.store');
+    Route::put('/sales/{sale}', [SalesController::class, 'update'])->name('sales.update');
+    Route::delete('/sales/{sale}', [SalesController::class, 'destroy'])->name('sales.destroy');
+});
+
+Route::middleware('auth')->group(function () {
+    Route::get('/sales-products', [ProductSaleController::class, 'index'])->name('sales-products.index');
+    Route::post('/sales-products/create', [ProductSaleController::class, 'store'])->name('sales-products.store');
+    Route::put('/sales-products/{productSale}', [ProductSaleController::class, 'update'])->name('sales-products.update');
+    Route::delete('/sales-products/{productSale}', [ProductSaleController::class, 'destroy'])->name('sales-products.destroy');
+});
 require __DIR__.'/auth.php';
 

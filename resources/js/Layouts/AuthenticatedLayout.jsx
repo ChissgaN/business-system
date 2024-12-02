@@ -37,7 +37,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 <NavLink href={route('products.index')} active={route().current('products.index')}>
                                     Productos
                                 </NavLink>
-                                <NavLink href={route('dashboard')} active={route().current('dashboard')}>
+                                <NavLink href={route('sales.index')} active={route().current('sales.index')}>
                                     Ventas
                                 </NavLink>
                                 <NavLink href={route('purchases.index')} active={route().current('purchases.index')}>
