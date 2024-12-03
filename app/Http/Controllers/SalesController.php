@@ -22,7 +22,7 @@ class SalesController extends Controller
             $users = User::all();
             $products = Products::all();
 
-            return Inertia::render('Auth/Purchases', [
+            return Inertia::render('Auth/Sales', [
                 'sales' => $sales,
                 'users' => $users,
                 'products' => $products,
@@ -40,7 +40,7 @@ class SalesController extends Controller
         $users = User::all();
         $products = Products::all();
 
-        return Inertia::render('Auth/Purchases', [
+        return Inertia::render('Auth/Sales', [
             'users' => $users,
             'products' => $products,
         ]);
@@ -54,7 +54,6 @@ class SalesController extends Controller
         $request->validate([
             'user_id' => 'required|exists:users,id',
             'document_date' => 'required|date',
-            'order_status' => 'required|integer|min:0|max:2',
             'payment_status' => 'required|integer|min:0|max:2',
             'total' => 'required|numeric|min:0',
         ]);
@@ -65,7 +64,6 @@ class SalesController extends Controller
             $sale = Sales::create([
                 'user_id' => $request->input('user_id'),
                 'document_date' => $formattedDate,
-                'order_status' => $request->input('order_status'),
                 'payment_status' => $request->input('payment_status'),
                 'total' => $request->input('total'),
             ]);
@@ -100,7 +98,6 @@ class SalesController extends Controller
         $validatedData = $request->validate([
             'user_id' => 'required|integer',
             'document_date' => 'required|date',
-            'order_status' => 'required|integer',
             'payment_status' => 'required|integer',
             'total' => 'required|numeric',
         ]);

@@ -62,7 +62,7 @@ Route::middleware('auth')->group(function () {
 
 Route::middleware('auth')->group(function () {
     Route::get('/sales', [SalesController::class, 'index'])->name('sales.index');
-    Route::post('/sales/create', [SalesController::class, 'create'])->name('sales.store');
+    Route::post('/sales/create', [SalesController::class, 'store'])->name('sales.store');
     Route::put('/sales/{sale}', [SalesController::class, 'update'])->name('sales.update');
     Route::delete('/sales/{sale}', [SalesController::class, 'destroy'])->name('sales.destroy');
 });

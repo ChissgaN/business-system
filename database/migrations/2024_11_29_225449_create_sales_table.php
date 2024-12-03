@@ -15,12 +15,12 @@ return new class extends Migration
             $table->id();
             $table->foreignId('user_id')->constrained('users')->onDelete('cascade');
             $table->dateTime('document_date');
-            $table->tinyInteger('order_status')->default(0);
             $table->tinyInteger('payment_status')->default(0);
             $table->decimal('total', 10, 2)->default(0);
             $table->timestamps();
         });
     }
+    
 
     /**
      * Reverse the migrations.

@@ -7,7 +7,7 @@ import { Column } from "primereact/column";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import FourActionButtons from "@/Components/ActionButtons";
-import StorePurchases from "@/Components/Purchases/StorePurchases";
+import StoreSales from "@/Components/Sales/StoreSales";
 import axios from "axios";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
@@ -16,49 +16,39 @@ import StorePurchaseProduct from "@/Components/Purchases/StorePurchaseProducts";
 import BillsPurchasesProducts from "@/Components/Purchases/BillsPurchasesProducts";
 import EditPurchases from "@/Components/Purchases/EditPurchases";
 
-export default function Purchases({
-    purchases = [],
+export default function Sales({
+    sales = [],
     users = [],
     products = [],
 }) {
     const [visibleCreateModal, setVisibleCreateModal] = useState(false);
     const [visibleProductsModal, setVisibleProductsModal] = useState(false);
     const [visibleEditModal, setVisibleEditModal] = useState(false);
-    const [visibleDeleteModal, setVisibleDeleteModal] = useState(false);
     const [visibleViewModal, setVisibleViewModal] = useState(false);
-    const [selectedPurchase, setSelectedPurchase] = useState(null);
-    const [purchaseProducts, setPurchaseProducts] = useState([]);
+    const [selectedSale, setSelectedSale] = useState(null);
+    const [productSale, setProductSale] = useState([]);
     const [searchTerm, setSearchTerm] = useState("");
-    const orderStatusOptions = [
-        { label: "No recibido", value: 0 },
-        { label: "Recibido", value: 1 },
-        { label: "Cancelado", value: 2 },
-    ];
     const paymentStatusOptions = [
-        { label: "Por pagar", value: 0 },
-        { label: "Crédito", value: 1 },
-        { label: "Pagado", value: 2 },
+        { label: "Por pagar", value: 1 },
+        { label: "Crédito", value: 2 },
+        { label: "Pagado", value: 0 },
     ];
-    const receivedStatusOptions = [
-        { label: "No Recibido", value: 0 },
-        { label: "Recibido", value: 1 },
-        { label: "Cancelado", value: 2 },
-    ];
-    const handleSavePurchase = (purchaseData) => {
-        Inertia.post(route("purchases.store"), purchaseData, {
+
+    const handleSaveSale = (saleData) => {
+        Inertia.post(route("sales.store"), saleData, {
             onSuccess: () => {
                 setVisibleCreateModal(false);
             },
         });
     };
     const actionBodyTemplate = (rowData) => {
-        const handleView = (purchase) => {
+        const handleView = (sale) => {
             axios
-                .get(route("purchase-products.index", { purchase_id: purchase.id }))
+                .get(route("sales-products.index", { sale_id: sale.id }))
                 .then((response) => {
-                    const { purchase, purchaseProducts } = response.data;
-                    setSelectedPurchase(purchase); // Detalles de la compra
-                    setPurchaseProducts(purchaseProducts); // Productos asociados
+                    const { sale, ProductSale  } = response.data;
+                    setSelectedSale(sale); // Detalles de la compra
+                    setProductSale(ProductSale); // Productos asociados
                     setVisibleViewModal(true);
                 })
                 .catch((error) => {
@@ -68,13 +58,13 @@ export default function Purchases({
         // Form states
         
         const handleProducts = (purchase) => {
-            setSelectedPurchase(purchase);
+            setSelectedSale(purchase);
             setVisibleProductsModal(true);
-            setPurchaseProducts([]); // Reset products
+            setProductSale([]); // Reset products
         };
         const handleEdit = (purchase) => {
-            setSelectedPurchase(purchase); // Asignar la compra seleccionada
-            setPurchaseProducts({
+            setSelectedSale(purchase); // Asignar la compra seleccionada
+            setProductSale({
                 user_id: purchase.user_id,
                 document_date: new Date(purchase.document_date),
                 order_status: purchase.order_status,
@@ -120,17 +110,17 @@ export default function Purchases({
                         className="p-inputtext w-[25%]"
                     />
                     <Button
-                        label="Nueva Compra"
+                        label="Nueva Venta"
                         icon="pi pi-plus"
                         onClick={() => setVisibleCreateModal(true)}
                         className="p-2 rounded-md bg-[#007bff] text-white"
                     />
                     {/* Modal para crear compras */}
                     {visibleCreateModal && (
-                        <StorePurchases
+                        <StoreSales
                             users={users}
                             products={products}
-                            onSave={handleSavePurchase}
+                            onSave={handleSaveSale}
                             onClose={() => setVisibleCreateModal(false)}
                         />
                     )}
@@ -138,22 +128,22 @@ export default function Purchases({
                         <BillsPurchasesProducts
                             visible={visibleViewModal}
                             onHide={() => setVisibleViewModal(false)}
-                            purchase={selectedPurchase}
-                            purchaseProducts={purchaseProducts}
+                            purchase={selectedSale}
+                            productSale={productSale}
                         />
                     )}
                     {visibleEditModal && (
                         <EditPurchases
                             visible={visibleEditModal} 
                             onHide={() => setVisibleEditModal(false)} 
-                            purchase={selectedPurchase} 
-                            purchaseProducts={purchaseProducts.products} 
+                            purchase={selectedSale} 
+                            productSale={productSale.products} 
                             users={users}
                         />
                     )}
                 </div>
                 {/* Main DataTable */}
-                <DataTable value={purchases} paginator rows={5} header="Listado de Compras"
+                <DataTable value={sales} paginator rows={5} header="Listado de Ventas"
                 rowClassName={(rowData) => (rowData.id % 2 === 0 ? 'bg-gray-800 text-white' : 'bg-gray-400 text-gray-700')}>
                     <Column field="id" header="ID" sortable />
                     <Column field="user.name" header="Usuario" sortable />
@@ -164,16 +154,6 @@ export default function Purchases({
                         sortable
                         body={(rowData) =>
                             `$${parseFloat(rowData.total).toFixed(2)}`
-                        }
-                    />
-                    <Column
-                        field="order_status"
-                        header="Estado Orden"
-                        sortable
-                        body={(rowData) =>
-                            orderStatusOptions.find(
-                                (opt) => opt.value === rowData.order_status
-                            )?.label
                         }
                     />
                     <Column
@@ -192,7 +172,7 @@ export default function Purchases({
                     <StorePurchaseProduct
                         visible={visibleProductsModal}
                         onClose={() => setVisibleProductsModal(false)}
-                        purchaseId={selectedPurchase?.id}
+                        purchaseId={selectedSale?.id}
                         products={products}
                     />
                 )}
