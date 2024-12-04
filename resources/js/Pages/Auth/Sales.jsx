@@ -13,7 +13,7 @@ import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import StorePurchaseProduct from "@/Components/Purchases/StorePurchaseProducts";
-import BillsPurchasesProducts from "@/Components/Purchases/BillsPurchasesProducts";
+import BillsProductsSale from "@/Components/Sales/BillsProductsSale";
 import EditPurchases from "@/Components/Purchases/EditPurchases";
 
 export default function Sales({
@@ -46,9 +46,9 @@ export default function Sales({
             axios
                 .get(route("sales-products.index", { sale_id: sale.id }))
                 .then((response) => {
-                    const { sale, ProductSale  } = response.data;
+                    const { sale, productSales  } = response.data;
                     setSelectedSale(sale); // Detalles de la compra
-                    setProductSale(ProductSale); // Productos asociados
+                    setProductSale(productSales); // Productos asociados
                     setVisibleViewModal(true);
                 })
                 .catch((error) => {
@@ -67,7 +67,6 @@ export default function Sales({
             setProductSale({
                 user_id: purchase.user_id,
                 document_date: new Date(purchase.document_date),
-                order_status: purchase.order_status,
                 payment_status: purchase.payment_status,
                 total: purchase.total,
             });
@@ -125,11 +124,11 @@ export default function Sales({
                         />
                     )}
                     {visibleViewModal && (
-                        <BillsPurchasesProducts
+                        <BillsProductsSale
                             visible={visibleViewModal}
                             onHide={() => setVisibleViewModal(false)}
-                            purchase={selectedSale}
-                            productSale={productSale}
+                            sale={selectedSale}
+                            productSales={productSale}
                         />
                     )}
                     {visibleEditModal && (

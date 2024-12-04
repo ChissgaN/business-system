@@ -17,20 +17,20 @@ class ProductSaleController extends Controller
      */
     public function index(Request $request)
     {
-        $saleId = $request->get('purchase_id');
+        $saleId = $request->get('sale_id');
         if (!$saleId) {
-            return response()->json(['error' => 'purchase_id is required'], 400);
+            return response()->json(['error' => 'sale_id is required'], 400);
         }
         $sale = Sales::with('user')->find($saleId);
         if (!$sale) {
             return response()->json(['error' => 'Sales not found'], 404);
         }
-        $saleProducts = ProductSale::where('purchase_id', $saleId)
+        $productSales = ProductSale::where('sale_id', $saleId)
             ->with('product') // Incluye los detalles del producto asociado
             ->get();
         return response()->json([
             'sale' => $sale,
-            'saleProducts' => $saleProducts,
+            'productSales' => $productSales,
         ]);
     }
 

@@ -3,11 +3,11 @@ import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
-const BillsPurchasesProducts = ({
+const BillsProductsSale = ({
     visible,
     onHide,
-    purchase,
-    purchaseProducts,
+    sale,
+    productSales,
 }) => {
     const formatDate = (date) => {
         if (!date) return "";
@@ -17,7 +17,7 @@ const BillsPurchasesProducts = ({
     return (
         <Dialog
             visible={visible}
-            header={`Factura de Compra`}
+            header={`Factura de la Venta`}
             onHide={onHide}
             className="w-2/4"
         >
@@ -25,18 +25,17 @@ const BillsPurchasesProducts = ({
                 {/* Información de la Compra */}
                 <section className="mb-4 flex justify-between items-center">
                     <div className="font-semibold text-green-700">
-                        <p>Fecha: {formatDate(purchase?.document_date)}</p>
-                        <p>Estado de la Orden: {purchase?.order_status === 0 ? 'No recibido' : purchase?.order_status === 1 ? 'Recibido' : 'Cancelado'}</p>
-                        <p>Estado del Pago: {purchase?.payment_status === 0 ? 'Por pagar' : purchase?.payment_status === 1 ? 'Pagado' : 'Crédito'}</p>
+                        <p>Fecha: {formatDate(sale?.document_date)}</p>
+                        <p>Estado del Pago: {sale?.payment_status === 0 ? 'Pagado' : sale?.payment_status === 1 ? 'Por Pagado' : 'Crédito'}</p>
                     </div>
                     <div className="font-bold text-[#191970]">
-                        <h3>ID de Compra: {purchase?.id}</h3>
-                        <p>Usuario: {purchase?.user?.name}</p>
+                        <h3>ID de Compra: {sale?.id}</h3>
+                        <p>Usuario: {sale?.user?.name}</p>
                     </div>
                 </section>
                 {/* Tabla de Productos */}
                 <DataTable
-                    value={purchaseProducts}
+                    value={productSales}
                     className="mt-4"
                     rowClassName={(rowData ) => (rowData.id % 2 === 0 ? 'bg-gray-800 text-white' : 'bg-gray-400 text-gray-700')}
                     tableStyle={{ minWidth: "38rem" }}
@@ -47,19 +46,18 @@ const BillsPurchasesProducts = ({
                         header="Producto"
                         body={(rowData) => rowData.product?.name || "N/A"}
                     />
-                    <Column field="received" header="Recibido" body={(rowData) => rowData.received === 1 ? 'Sí' : rowData.received === 2 ? 'Cancelado' : 'No'} />
                     <Column field="qty" header="Cantidad" />
                     <Column
                         field="cost"
                         header="Precio Unitario"
                         body={(rowData) =>
-                            `$${parseFloat(rowData.cost).toFixed(2)}`
+                            `$${parseFloat(rowData.price).toFixed(2)}`
                         }
                     />
                     <Column
                         header="Subtotal"
                         body={(rowData) =>
-                            `$${(rowData.cost * rowData.qty).toFixed(2)}`
+                            `$${(rowData.price * rowData.qty).toFixed(2)}`
                         }
                     />
                 </DataTable>
@@ -67,10 +65,10 @@ const BillsPurchasesProducts = ({
                 <section className="flex justify-between mt-4 items-center">
                     <div>
                     <h4 className="font-bold text-[#191970] text-xl">Total: $
-                        {purchaseProducts
-                            .reduce(
+                        {productSales
+                        .reduce(
                                 (acc, item) =>
-                                    acc + (item.cost || 0) * item.qty,
+                                    acc + (item.price || 0) * item.qty,
                                 0
                             ).toFixed(2)}
                     </h4>
@@ -88,5 +86,4 @@ const BillsPurchasesProducts = ({
         </Dialog>
     );
 };
-
-export default BillsPurchasesProducts;
+export default BillsProductsSale;
