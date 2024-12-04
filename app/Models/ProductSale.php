@@ -11,20 +11,18 @@ class ProductSale extends Model
     use HasFactory;
 
     protected $fillable = [
-        'purchase_id',
+        'sale_id',
         'product_id',
         'qty',
-        'cost',
-        'received',
+        'price',
     ];
 
     protected $casts = [
         'qty' => 'integer',
         'cost' => 'decimal:2',
-        'received' => 'integer',
     ];
 
-    public function sales()
+    public function sale()
     {
         return $this->belongsTo(Sales::class);
     }

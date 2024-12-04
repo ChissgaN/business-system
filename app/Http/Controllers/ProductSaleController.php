@@ -58,13 +58,13 @@ class ProductSaleController extends Controller
      */
     public function store(Request $request)
     {
+        
         $request->validate([
             'products' => 'required|array',
             'products.*.product_id' => 'required|exists:products,id',
             'products.*.qty' => 'required|integer|min:1',
-            'products.*.cost' => 'required|numeric|min:0',
-            'products.*.received' => 'required|integer|min:0|max:2',
-            'purchase_id' => 'required|exists:purchases,id',
+            'products.*.price' => 'required|numeric|min:0',
+            'sale_id' => 'required|exists:sales,id',
         ]);
 
         DB::beginTransaction(); // Iniciar transacción para asegurar consistencia de datos
@@ -74,15 +74,14 @@ class ProductSaleController extends Controller
             foreach ($request->products as $product) {
                 // Crear el registro en PurchaseProducts
                 ProductSale::create([
-                    'purchase_id' => $request->input('purchase_id'),
+                    'sale_id' => $request->input('sale_id'),
                     'product_id' => $product['product_id'],
                     'qty' => $product['qty'],
-                    'cost' => $product['cost'],
-                    'received' => $product['received'],
+                    'price' => $product['price'],
                 ]);
 
                 // Calcular el costo total del producto
-                $totalToAdd += $product['qty'] * $product['cost'];
+                $totalToAdd += $product['qty'] * $product['price'];
             }
 
             // Actualizar el total en la tabla Purchases
@@ -120,7 +119,6 @@ class ProductSaleController extends Controller
     {
         $validatedData = $request->validate([
             'qty' => 'required|integer',
-            'received' => 'required|integer',
         ]);
         $purchase = ProductSale::findOrFail($id);
         $purchase->update($validatedData);

@@ -7,79 +7,70 @@ import { Button } from "primereact/button";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { useForm } from "@inertiajs/react";
-
-export default function StorePurchaseProduct({
+export default function StoreProductSale({
     visible,
     onClose,
-    purchaseId,
+    saleId,
     products,
 }) {
-    const [purchaseProducts, setPurchaseProducts] = useState([]);
+    const [productsSale, setProductsSale] = useState([]);
     const [newProduct, setNewProduct] = useState({
         product_id: "",
         qty: 1,
-        cost: 0,
-        received: 0,
+        price: 0,
     });
     const [editingIndex, setEditingIndex] = useState(null); // Índice del producto que se está editando
     const { post, processing } = useForm({
         products: [],
     });
-
-    const receivedStatusOptions = [
-        { label: "No Recibido", value: 0 },
-        { label: "Recibido", value: 1 },
-        { label: "Cancelado", value: 2 },
-    ];
     const handleAddOrUpdateProduct = () => {
         const product = products.find((p) => p.id === newProduct.product_id);
         if (product) {
             if (editingIndex !== null) {
                 // Actualizar producto existente
-                const updatedProducts = [...purchaseProducts];
+                const updatedProducts = [...productsSale];
                 updatedProducts[editingIndex] = {
                     ...newProduct,
-                    cost: product.price,
+                    price: product.price,
                 };
-                setPurchaseProducts(updatedProducts);
+                setProductsSale(updatedProducts);
                 setEditingIndex(null); // Terminar edición
             } else {
                 // Agregar nuevo producto
-                setPurchaseProducts([
-                    ...purchaseProducts,
-                    { ...newProduct, cost: product.price },
+                setProductsSale([
+                    ...productsSale,
+                    { ...newProduct, price: product.price },
                 ]);
             }
-            setNewProduct({ product_id: "", qty: 1, cost: 0, received: 0 });
+            setNewProduct({ product_id: "", qty: 1, price: 0, received: 0 });
         }
     };
     const handleEditProduct = (index) => {
-        const productToEdit = purchaseProducts[index];
+        const productToEdit = productsSale[index];
         setNewProduct(productToEdit);
         setEditingIndex(index); // Guardar índice del producto a editar
     };
     const handleDeleteProduct = (index) => {
-        const updatedProducts = purchaseProducts.filter((_, i) => i !== index);
-        setPurchaseProducts(updatedProducts);
+        const updatedProducts = productsSale.filter((_, i) => i !== index);
+        setProductsSale(updatedProducts);
     };
     const handleSaveProducts = () => {
-        const formattedProducts = purchaseProducts.map((product) => ({
+        const formattedProducts = productsSale.map((product) => ({
             product_id: parseInt(product.product_id),
             qty: parseInt(product.qty),
-            cost: parseFloat(product.cost),
-            received: parseInt(product.received),
+            price: parseFloat(product.price),
         }));
         if (formattedProducts.length === 0) {
             alert("No hay productos para guardar. Agrega al menos uno.");
             return;
         }
         const payload = {
-            purchase_id: purchaseId,
             products: formattedProducts,
+            sale_id: saleId,
         };
-        Inertia.post(route("purchase-products.store"), payload, {
+        Inertia.post(route("sales-products.store"), payload, {
             onSuccess: () => {
-                setPurchaseProducts([]);
+                setProductsSale([]);
                 onClose();
             },
             onError: (errors) => {
@@ -112,7 +103,7 @@ export default function StorePurchaseProduct({
                             setNewProduct({
                                 ...newProduct,
                                 product_id: e.value,
-                                cost: product?.price || 0,
+                                price: product?.price || 0,
                             });
                         }}
                         placeholder="Seleccione un Producto"
@@ -154,25 +145,8 @@ export default function StorePurchaseProduct({
                         Precio Unitario
                     </label>
                     <InputText
-                        value={newProduct.cost}
+                        value={newProduct.price || 0}
                         disabled
-                        className="w-full"
-                    />
-                </div>
-                <div className="mb-4">
-                    <label className="block mb-2 font-semibold text-[#191970]">
-                        Estado de Recepción
-                    </label>
-                    <Dropdown
-                        value={newProduct.received}
-                        options={receivedStatusOptions}
-                        onChange={(e) =>
-                            setNewProduct({
-                                ...newProduct,
-                                received: e.value,
-                            })
-                        }
-                        placeholder="Seleccione un Estado"
                         className="w-full"
                     />
                 </div>
@@ -186,9 +160,9 @@ export default function StorePurchaseProduct({
                     className="mb-4 w-full"
                     disabled={!newProduct.product_id}
                 />
-                {purchaseProducts.length > 0 && (
+                {productsSale.length > 0 && (
                     <div className="mb-4">
-                        <DataTable value={purchaseProducts}>
+                        <DataTable value={productsSale}>
                             <Column
                                 field="product_id"
                                 header="Producto"
@@ -199,11 +173,11 @@ export default function StorePurchaseProduct({
                                 }
                             />
                             <Column field="qty" header="Cantidad" />
-                            <Column field="cost" header="Costo Unitario" />
+                            <Column field="price" header="Precio Unitario" />
                             <Column
                                 header="Total"
                                 body={(rowData) =>
-                                    `$${(rowData.qty * rowData.cost).toFixed(
+                                    `$${(rowData.qty * rowData.price).toFixed(
                                         2
                                     )}`
                                 }

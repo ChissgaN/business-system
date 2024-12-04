@@ -12,9 +12,9 @@ import axios from "axios";
 import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
-import StorePurchaseProduct from "@/Components/Purchases/StorePurchaseProducts";
 import BillsProductsSale from "@/Components/Sales/BillsProductsSale";
 import EditPurchases from "@/Components/Purchases/EditPurchases";
+import StoreProductSale from "@/Components/Sales/StoreProductsSale";
 
 export default function Sales({
     sales = [],
@@ -114,7 +114,7 @@ export default function Sales({
                         onClick={() => setVisibleCreateModal(true)}
                         className="p-2 rounded-md bg-[#007bff] text-white"
                     />
-                    {/* Modal para crear compras */}
+                    {/* Modal para crear ventas */}
                     {visibleCreateModal && (
                         <StoreSales
                             users={users}
@@ -168,10 +168,10 @@ export default function Sales({
                     <Column header="Acciones" body={actionBodyTemplate} />
                 </DataTable>
                 {visibleProductsModal && (
-                    <StorePurchaseProduct
+                    <StoreProductSale
                         visible={visibleProductsModal}
                         onClose={() => setVisibleProductsModal(false)}
-                        purchaseId={selectedSale?.id}
+                        saleId={selectedSale?.id}
                         products={products}
                     />
                 )}
