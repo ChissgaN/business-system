@@ -28,7 +28,7 @@ export default function Register({ roles }) {
 
             <form onSubmit={submit}>
                 <div>
-                    <InputLabel htmlFor="name" value="Name" />
+                    <InputLabel htmlFor="name" value="Nombre" />
                     <TextInput
                         id="name"
                         name="name"
@@ -43,7 +43,7 @@ export default function Register({ roles }) {
                 </div>
 
                 <div className="mt-4">
-                    <InputLabel htmlFor="email" value="Email" />
+                    <InputLabel htmlFor="email" value="Correo electrónico" />
                     <TextInput
                         id="email"
                         type="email"
@@ -58,7 +58,7 @@ export default function Register({ roles }) {
                 </div>
 
                 <div className="mt-4">
-                    <InputLabel htmlFor="role_id" value="Role" />
+                    <InputLabel htmlFor="role_id" value="Rol" />
                     <select
                         id="role_id"
                         name="role_id"
@@ -67,7 +67,7 @@ export default function Register({ roles }) {
                         onChange={(e) => setData('role_id', e.target.value)}
                         required
                     >
-                        <option value="">Choose a role</option>
+                        <option value="">Seleccione un rol</option>
                         {roles && roles.length > 0 ? (
                             roles.map((role) => (
                                 <option key={role.id} value={role.id}>
@@ -75,14 +75,14 @@ export default function Register({ roles }) {
                                 </option>
                             ))
                         ) : (
-                            <option disabled value="">No roles available</option>
+                            <option disabled value="">Sin roles disponibles</option>
                         )}
                     </select>
                     <InputError message={errors.role_id} className="mt-2" />
                 </div>
 
                 <div className="mt-4">
-                    <InputLabel htmlFor="password" value="Password" />
+                    <InputLabel htmlFor="password" value="Contraseña" />
                     <TextInput
                         id="password"
                         type="password"
@@ -97,7 +97,7 @@ export default function Register({ roles }) {
                 </div>
 
                 <div className="mt-4">
-                    <InputLabel htmlFor="password_confirmation" value="Confirm Password" />
+                    <InputLabel htmlFor="password_confirmation" value="Confirmar contraseña" />
                     <TextInput
                         id="password_confirmation"
                         type="password"
@@ -116,11 +116,11 @@ export default function Register({ roles }) {
                         href={route('login')}
                         className="rounded-md text-sm text-gray-600 underline hover:text-gray-900 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
                     >
-                        Already registered?
+                        ¿Ya tienes una cuenta?
                     </Link>
 
                     <PrimaryButton className="ms-4" disabled={processing}>
-                        Register
+                        Registrarme
                     </PrimaryButton>
                 </div>
             </form>

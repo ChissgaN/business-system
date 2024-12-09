@@ -21,11 +21,10 @@ export default function StorePurchaseProduct({
         cost: 0,
         received: 0,
     });
-    const [editingIndex, setEditingIndex] = useState(null); // Índice del producto que se está editando
+    const [editingIndex, setEditingIndex] = useState(null);
     const { post, processing } = useForm({
         products: [],
     });
-
     const receivedStatusOptions = [
         { label: "No Recibido", value: 0 },
         { label: "Recibido", value: 1 },
@@ -35,16 +34,14 @@ export default function StorePurchaseProduct({
         const product = products.find((p) => p.id === newProduct.product_id);
         if (product) {
             if (editingIndex !== null) {
-                // Actualizar producto existente
                 const updatedProducts = [...purchaseProducts];
                 updatedProducts[editingIndex] = {
                     ...newProduct,
                     cost: product.price,
                 };
                 setPurchaseProducts(updatedProducts);
-                setEditingIndex(null); // Terminar edición
+                setEditingIndex(null); 
             } else {
-                // Agregar nuevo producto
                 setPurchaseProducts([
                     ...purchaseProducts,
                     { ...newProduct, cost: product.price },
@@ -56,7 +53,7 @@ export default function StorePurchaseProduct({
     const handleEditProduct = (index) => {
         const productToEdit = purchaseProducts[index];
         setNewProduct(productToEdit);
-        setEditingIndex(index); // Guardar índice del producto a editar
+        setEditingIndex(index);
     };
     const handleDeleteProduct = (index) => {
         const updatedProducts = purchaseProducts.filter((_, i) => i !== index);
@@ -183,7 +180,7 @@ export default function StorePurchaseProduct({
                             : "Agregar Producto"
                     }
                     onClick={handleAddOrUpdateProduct}
-                    className="mb-4 w-full"
+                    className="mb-4 w-full bg-green-500 text-white p-2 rounded-md"
                     disabled={!newProduct.product_id}
                 />
                 {purchaseProducts.length > 0 && (
@@ -230,12 +227,14 @@ export default function StorePurchaseProduct({
                                 )}
                             />
                         </DataTable>
+                        <div className="w-full flex justify-center items-center ">
                         <Button
                             label="Guardar Productos"
                             onClick={handleSaveProducts}
                             disabled={processing}
-                            className="mt-4 w-full"
+                            className="mt-4 w-1/3 bg-[#007bff] text-white p-2 rounded-md"
                         />
+                        </div>
                     </div>
                 )}
             </div>

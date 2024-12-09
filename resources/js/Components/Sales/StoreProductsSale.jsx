@@ -157,7 +157,7 @@ export default function StoreProductSale({
                             : "Agregar Producto"
                     }
                     onClick={handleAddOrUpdateProduct}
-                    className="mb-4 w-full"
+                    className="mb-4 w-full bg-green-500 text-white p-2 rounded-md"
                     disabled={!newProduct.product_id}
                 />
                 {productsSale.length > 0 && (
@@ -204,12 +204,14 @@ export default function StoreProductSale({
                                 )}
                             />
                         </DataTable>
+                        <div className="w-full flex justify-center items-center ">
                         <Button
                             label="Guardar Productos"
                             onClick={handleSaveProducts}
                             disabled={processing}
-                            className="mt-4 w-full"
+                            className="mt-4 w-1/3 bg-[#007bff] text-white p-2 rounded-md"
                         />
+                        </div>
                     </div>
                 )}
             </div>
