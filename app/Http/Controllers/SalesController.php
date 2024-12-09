@@ -109,10 +109,10 @@ class SalesController extends Controller
     /**
      * Remove the specified resource from storage.
      */
-    public function destroy(Sales $sales)
+    public function destroy(Sales $sale)
     {
         try {
-            $sales->delete();
+            $sale->delete();
             return Redirect::route('sales.index')->with('success', 'Venta eliminada exitosamente.');
         } catch (\Exception $e) {
             return Redirect::back()->with('error', 'Error al eliminar la venta: ' . $e->getMessage());

@@ -13,8 +13,8 @@ import "primereact/resources/themes/saga-blue/theme.css";
 import "primereact/resources/primereact.min.css";
 import "primeicons/primeicons.css";
 import BillsProductsSale from "@/Components/Sales/BillsProductsSale";
-import EditPurchases from "@/Components/Purchases/EditPurchases";
 import StoreProductSale from "@/Components/Sales/StoreProductsSale";
+import EditSales from "@/Components/Sales/EditSales";
 
 export default function Sales({
     sales = [],
@@ -72,16 +72,16 @@ export default function Sales({
             });
             setVisibleEditModal(true); // Mostrar modal de edición
         };
-        const handleDelete = (purchase) => {
-            Inertia.delete(route("purchases.destroy", { purchase: purchase.id }), {
+        const handleDelete = (sales) => {
+            Inertia.delete(route("sales.destroy", { sale: sales.id }), {
                 onSuccess: () => {
-                    console.log("Compra eliminada exitosamente");
                 },
                 onError: (errors) => {
-                    console.error("Error al eliminar la compra:", errors);
+                    console.error("Error al eliminar la venta:", errors);
                 },
             });
         };
+        
         return (
             <FourActionButtons
                 rowData={rowData}
@@ -132,11 +132,11 @@ export default function Sales({
                         />
                     )}
                     {visibleEditModal && (
-                        <EditPurchases
+                        <EditSales
                             visible={visibleEditModal} 
                             onHide={() => setVisibleEditModal(false)} 
-                            purchase={selectedSale} 
-                            productSale={productSale.products} 
+                            sale={selectedSale} 
+                            productSales={productSale.products} 
                             users={users}
                         />
                     )}
