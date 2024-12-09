@@ -8,10 +8,24 @@ import axios from "axios";
 import { Inertia } from "@inertiajs/inertia";
 import { InputText } from "primereact/inputtext";
 
-const EditProductsSale = ({ saleId }) => {
+const EditProductsSale = ({ saleId, onTotalChange }) => {
     const [editedProducts, setEditedProducts] = useState([]);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [showEditDialog, setShowEditDialog] = useState(false);
+    useEffect(() => {
+        axios
+            .get(route("sales-products.index", { sale_id: saleId }))
+            .then((response) => {
+                setEditedProducts(response.data.productSales || []);
+            });
+    }, [saleId]);
+    useEffect(() => {
+        const total = editedProducts.reduce(
+            (acc, product) => acc + (product.price || 0) * (product.qty || 0),
+            0
+        );
+        if (onTotalChange) onTotalChange(total.toFixed(2));
+    }, [editedProducts, onTotalChange]);
 
     useEffect(() => {
         axios.get(route("sales-products.index", { sale_id: saleId }))

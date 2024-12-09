@@ -5,11 +5,10 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Dropdown } from "primereact/dropdown";
 import EditProductsSale from "./EditProductsSale";
-
 const EditSales = ({ visible, onHide, sale, users }) => {
     const [editedSale, setEditedSale] = useState({ ...sale });
     const [loading, setLoading] = useState(false);
-
+    const [total, setTotal] = useState(0); 
     useEffect(() => {
         if (sale?.document_date) {
             const formattedDate = sale.document_date.split(" ")[0];
@@ -19,14 +18,13 @@ const EditSales = ({ visible, onHide, sale, users }) => {
             });
         }
     }, [sale]);
-
     const handleEditSale = () => {
         const backendDate = `${editedSale.document_date} 00:00:00`;
         const salePayload = {
             user_id: editedSale.user_id,
             document_date: backendDate,
             payment_status: editedSale.payment_status,
-            total: parseFloat(editedSale.total || 0).toFixed(2),
+            total: parseFloat(total || 0).toFixed(2), // Usa el total calculado
         };
         Inertia.put(route("sales.update", { sale: sale.id }), salePayload, {
             onSuccess: () => {
@@ -38,7 +36,6 @@ const EditSales = ({ visible, onHide, sale, users }) => {
             },
         });
     };
-
     return (
         <Dialog
             visible={visible}
@@ -46,7 +43,7 @@ const EditSales = ({ visible, onHide, sale, users }) => {
             onHide={onHide}
             className="w-3/4"
         >
-            {/* Información de la Compra */}
+            {/* Información de la Venta */}
             <section className="mb-4 p-fluid">
                 <div className="flex justify-around mb-4 text-center items-center">
                     <div>
@@ -114,14 +111,18 @@ const EditSales = ({ visible, onHide, sale, users }) => {
                     </div>
                 </div>
             </section>
-
             {/* Componente de Productos */}
-            <EditProductsSale saleId={sale.id} />
-
-            {/* Botón Guardar Compra */}
-            <section className="flex justify-center mt-4">
+            <EditProductsSale
+                saleId={sale.id}
+                onTotalChange={(calculatedTotal) => setTotal(calculatedTotal)}
+            />
+            {/* Botón Guardar Venta y Total */}
+            <section className="flex justify-around mt-4 items-center">
+                <h4 className="text-xl font-bold text-[#191970]">
+                    Total: ${total}
+                </h4>
                 <Button
-                    label="Guardar Compra"
+                    label="Guardar Venta"
                     icon="pi pi-save"
                     onClick={handleEditSale}
                     disabled={loading}
@@ -131,5 +132,6 @@ const EditSales = ({ visible, onHide, sale, users }) => {
         </Dialog>
     );
 };
+
 
 export default EditSales;
