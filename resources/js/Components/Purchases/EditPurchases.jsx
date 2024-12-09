@@ -1,3 +1,10 @@
+import React, { useState, useEffect } from "react";
+import { Inertia } from "@inertiajs/inertia";
+import { Dialog } from "primereact/dialog";
+import { Button } from "primereact/button";
+import { InputText } from "primereact/inputtext";
+import { Dropdown } from "primereact/dropdown";
+import EditPurchasesProduct from "./EditPurchasesProducts";
 const EditPurchases = ({ visible, onHide, purchase, users }) => {
     const [editedPurchase, setEditedPurchase] = useState({ ...purchase });
     const [purchaseTotal, setPurchaseTotal] = useState(0);
@@ -152,3 +159,4 @@ const EditPurchases = ({ visible, onHide, purchase, users }) => {
         </Dialog>
     );
 };
+export default EditPurchases;
