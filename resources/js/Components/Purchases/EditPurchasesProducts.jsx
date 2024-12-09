@@ -9,39 +9,31 @@ import axios from "axios";
 import { Inertia } from "@inertiajs/inertia";
 import { InputText } from "primereact/inputtext";
 
-const EditPurchasesProduct = ({ purchaseId }) => {
+const EditPurchasesProduct = ({ purchaseId, onTotalChange }) => {
     const [editedProducts, setEditedProducts] = useState([]);
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [showEditDialog, setShowEditDialog] = useState(false);
-
     const receivedStatusOptions = [
         { label: "No Recibido", value: 0 },
         { label: "Recibido", value: 1 },
         { label: "Cancelado", value: 2 },
     ];
-
     useEffect(() => {
         axios.get(route("purchase-products.index", { purchase_id: purchaseId }))
             .then((response) => {
-                setEditedProducts(response.data.purchaseProducts || []);
+                const products = response.data.purchaseProducts || [];
+                setEditedProducts(products);
+                updateTotal(products);
             });
     }, [purchaseId]);
-
-    const openEditDialog = (product) => {
-        setSelectedProduct({ ...product });
-        setShowEditDialog(true);
+    const updateTotal = (products) => {
+        const total = products.reduce(
+            (acc, product) => acc + product.qty * product.cost,
+            0
+        );
+        onTotalChange(total);
     };
-
-    const closeEditDialog = () => {
-        setSelectedProduct(null);
-        setShowEditDialog(false);
-    };
-
-    const handleEditChange = (field, value) => {
-        setSelectedProduct((prev) => ({ ...prev, [field]: value }));
-    };
-
-    const handleEditSave = () => {       
+    const handleEditSave = () => {
         Inertia.put(route("purchase-products.update", { purchaseProducts: selectedProduct.id }),
             {
                 qty: selectedProduct.qty,
@@ -49,26 +41,25 @@ const EditPurchasesProduct = ({ purchaseId }) => {
             },
             {
                 onSuccess: () => {
-                    setEditedProducts((prev) =>
-                        prev.map((product) =>
-                            product.id === selectedProduct.id ? { ...product, ...selectedProduct } : product
-                        )
+                    const updatedProducts = editedProducts.map((product) =>
+                        product.id === selectedProduct.id ? { ...product, ...selectedProduct } : product
                     );
+                    setEditedProducts(updatedProducts);
+                    updateTotal(updatedProducts);
                     closeEditDialog();
                 },
             }
         );
-    };    
+    };
     const handleDelete = (id) => {
-        console.log("ID to delete:", id); // Verifica que sea el ID correcto
         Inertia.delete(route("purchase-products.destroy", { purchaseProduct: id }), {
             onSuccess: () => {
-                setEditedProducts(editedProducts.filter(product => product.id !== id));
+                const remainingProducts = editedProducts.filter(product => product.id !== id);
+                setEditedProducts(remainingProducts);
+                updateTotal(remainingProducts);
             },
         });
     };
-    
-
     return (
         <>
             <DataTable value={editedProducts} dataKey="id" paginator rows={5}>

@@ -1,13 +1,6 @@
-import React, { useState, useEffect } from "react";
-import { Inertia } from "@inertiajs/inertia";
-import { Dialog } from "primereact/dialog";
-import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
-import { Dropdown } from "primereact/dropdown";
-import EditPurchasesProduct from "./EditPurchasesProducts";
-
 const EditPurchases = ({ visible, onHide, purchase, users }) => {
     const [editedPurchase, setEditedPurchase] = useState({ ...purchase });
+    const [purchaseTotal, setPurchaseTotal] = useState(0);
     const [loading, setLoading] = useState(false);
 
     useEffect(() => {
@@ -18,7 +11,13 @@ const EditPurchases = ({ visible, onHide, purchase, users }) => {
                 document_date: formattedDate,
             });
         }
+        // Inicializa el total desde el backend
+        setPurchaseTotal(parseFloat(purchase.total || 0).toFixed(2));
     }, [purchase]);
+
+    const updateTotal = (newTotal) => {
+        setPurchaseTotal(newTotal.toFixed(2));
+    };
 
     const handleSavePurchase = () => {
         const backendDate = `${editedPurchase.document_date} 00:00:00`;
@@ -27,8 +26,9 @@ const EditPurchases = ({ visible, onHide, purchase, users }) => {
             document_date: backendDate,
             order_status: editedPurchase.order_status,
             payment_status: editedPurchase.payment_status,
-            total: parseFloat(editedPurchase.total || 0).toFixed(2),
+            total: parseFloat(purchaseTotal).toFixed(2), // Usa el total actualizado
         };
+
         Inertia.put(route("purchases.update", { purchase: purchase.id }), purchasePayload, {
             onSuccess: () => {
                 alert("Compra actualizada exitosamente.");
@@ -41,12 +41,7 @@ const EditPurchases = ({ visible, onHide, purchase, users }) => {
     };
 
     return (
-        <Dialog
-            visible={visible}
-            header="Editar Compra"
-            onHide={onHide}
-            className="w-3/4"
-        >
+        <Dialog visible={visible} header="Editar Compra" onHide={onHide} className="w-3/4">
             {/* Información de la Compra */}
             <section className="mb-4 p-fluid">
                 <div className="flex justify-around mb-4 text-center items-center">
@@ -134,7 +129,15 @@ const EditPurchases = ({ visible, onHide, purchase, users }) => {
             </section>
 
             {/* Componente de Productos */}
-            <EditPurchasesProduct purchaseId={purchase.id} />
+            <EditPurchasesProduct
+                purchaseId={purchase.id}
+                onTotalChange={updateTotal} // Prop para manejar el total
+            />
+
+            {/* Mostrar Total Actualizado */}
+            <section className="flex justify-center mt-4">
+                <h3 className="font-bold text-xl text-gray-700">Total: ${purchaseTotal}</h3>
+            </section>
 
             {/* Botón Guardar Compra */}
             <section className="flex justify-center mt-4">
@@ -149,5 +152,3 @@ const EditPurchases = ({ visible, onHide, purchase, users }) => {
         </Dialog>
     );
 };
-
-export default EditPurchases;
