@@ -18,6 +18,10 @@ const EditPurchasesProduct = ({ purchaseId, onTotalChange }) => {
         { label: "Recibido", value: 1 },
         { label: "Cancelado", value: 2 },
     ];
+    const closeEditDialog = () => {
+        setSelectedProduct(null);
+        setShowEditDialog(false);
+    };
     useEffect(() => {
         axios.get(route("purchase-products.index", { purchase_id: purchaseId }))
             .then((response) => {
