@@ -18,6 +18,13 @@ const EditPurchasesProduct = ({ purchaseId, onTotalChange }) => {
         { label: "Recibido", value: 1 },
         { label: "Cancelado", value: 2 },
     ];
+    const openEditDialog = (product) => {
+        setSelectedProduct({ ...product });
+        setShowEditDialog(true);
+    };
+    const handleEditChange = (field, value) => {
+        setSelectedProduct((prev) => ({ ...prev, [field]: value }));
+    };
     const closeEditDialog = () => {
         setSelectedProduct(null);
         setShowEditDialog(false);
