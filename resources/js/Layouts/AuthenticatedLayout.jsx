@@ -46,7 +46,7 @@ export default function AuthenticatedLayout({ header, children }) {
                                 <NavLink href={route('expenses.index')} active={route().current('expenses.index')}>
                                     Gastos
                                 </NavLink>
-                                <NavLink href={route('dashboard')} active={route().current('dashboard')}>
+                                <NavLink href={route('balance.getBalance')} active={route().current('balance.getBalance')}>
                                     Balance
                                 </NavLink>
                             </div>

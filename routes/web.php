@@ -3,6 +3,7 @@
 use App\Http\Controllers\ExpensesController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\Auth\RegisteredUserController;
+use App\Http\Controllers\BalanceController;
 use App\Http\Controllers\ProductSaleController;
 use App\Http\Controllers\ProductsController;
 use App\Http\Controllers\PurchaseProductsController;
@@ -81,5 +82,9 @@ Route::middleware('auth')->group(function(){
     Route::put('/expenses/{expenses}', [ExpensesController::class, 'update'])->name('expenses.update');
     Route::delete('/expenses/{expenses}', [ExpensesController::class, 'destroy'])->name('expenses.destroy');
 });
-require __DIR__.'/auth.php';
 
+Route::middleware('auth')->group(function(){
+    Route::get('/balance', [BalanceController::class, 'index'])->name('balance.getBalance');
+});
+
+require __DIR__.'/auth.php';
