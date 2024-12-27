@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { router } from "@inertiajs/react";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Card } from "primereact/card";
@@ -24,7 +25,6 @@ export default function Balance({
     });
 
     const fetchData = async () => {
-        window.location.reload(); // Actualizar la página para mostrar los nuevos datos
         setIsLoading(true);
         try {
             const response = await axios.get(`/balance`, {
@@ -44,11 +44,19 @@ export default function Balance({
             setIsLoading(false);
         }
     };
-    
+
     const handleUpdateClick = () => {
-        fetchData(); // Llama a la función fetchData cuando el usuario hace clic en "Actualizar"
+        if (
+            month >= 1 &&
+            month <= 12 &&
+            year >= 2000 &&
+            year <= new Date().getFullYear()
+        ) {
+            router.get(`/balance`, { month, year });
+        } else {
+            alert("Por favor, introduce un mes y un año válidos.");
+        }
     };
-    
 
     const calculateBalance = () => {
         const { sales = 0, purchases = 0, expenses = 0 } = data.totals || {};
@@ -66,13 +74,19 @@ export default function Balance({
         return new Date(date).toLocaleDateString("es-ES", options);
     };
 
+    // Función para formatear números a dos decimales
+    const formatCurrency = (value) => {
+        const number = parseFloat(value || 0);
+        return number.toFixed(2);
+    };
+
     return (
         <AuthenticatedLayout>
             <Head title="Balance" />
 
-            <Card className="m-2">
+            <Card className="m-4 shadow-lg rounded-lg bg-white p-4">
                 <div className="flex justify-between items-center">
-                    <p className="text-lg text-[#0d47a1]">
+                    <p className="text-xl font-semibold text-[#0d47a1]">
                         Seleccionar Mes y Año:
                     </p>
                     <div className="flex gap-4">
@@ -83,7 +97,7 @@ export default function Balance({
                             min="1"
                             max="12"
                             placeholder="Mes"
-                            className="rounded-md"
+                            className="rounded-md border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500"
                         />
 
                         <input
@@ -93,12 +107,12 @@ export default function Balance({
                             min="2020"
                             max={new Date().getFullYear()}
                             placeholder="Año"
-                            className="rounded-md"
+                            className="rounded-md border border-gray-300 p-2 focus:ring-2 focus:ring-blue-500"
                         />
 
                         <button
                             onClick={handleUpdateClick}
-                            className="bg-blue-500 text-white rounded-md px-4 py-2"
+                            className="bg-blue-600 text-white rounded-md px-6 py-2 hover:bg-blue-700 transition-colors"
                         >
                             Actualizar
                         </button>
@@ -107,10 +121,22 @@ export default function Balance({
             </Card>
 
             {isLoading ? (
-                <p>Cargando datos...</p>
+                <div className="m-4 text-center">
+                    <p className="text-xl text-gray-600">Cargando datos...</p>
+                    <div className="spinner-border animate-spin border-4 border-t-4 border-blue-500 rounded-full w-16 h-16 mx-auto mt-4"></div>
+                </div>
             ) : (
-                <div className="m-2">
-                    <DataTable value={data.sales} header="Listado de Ventas">
+                <div className="m-4 space-y-6">
+                    {/* Tabla de Ventas */}
+                    <DataTable
+                        value={data.sales}
+                        header={
+                            <div className="bg-green-600 text-white text-lg font-bold p-3 rounded-t-lg">
+                                Listado de Ventas
+                            </div>
+                        }
+                        className="shadow-md rounded-lg"
+                    >
                         <Column field="id" header="ID" />
                         <Column
                             header="Usuario"
@@ -126,10 +152,15 @@ export default function Balance({
                         <Column field="total" header="Total Venta" />
                     </DataTable>
 
+                    {/* Tabla de Compras */}
                     <DataTable
                         value={data.purchases}
-                        header="Listado de Compras"
-                        className="mt-4"
+                        header={
+                            <div className="bg-orange-600 text-white text-lg font-bold p-3 rounded-t-lg">
+                                Listado de Compras
+                            </div>
+                        }
+                        className="shadow-md rounded-lg"
                     >
                         <Column field="id" header="ID" />
                         <Column
@@ -146,10 +177,15 @@ export default function Balance({
                         <Column field="total" header="Total Compra" />
                     </DataTable>
 
+                    {/* Tabla de Gastos */}
                     <DataTable
                         value={data.expenses}
-                        header="Listado de Gastos"
-                        className="mt-4"
+                        header={
+                            <div className="bg-red-600 text-white text-lg font-bold p-3 rounded-t-lg">
+                                Listado de Gastos
+                            </div>
+                        }
+                        className="shadow-md rounded-lg"
                     >
                         <Column field="id" header="ID" />
                         <Column
@@ -165,11 +201,35 @@ export default function Balance({
                         <Column field="amount" header="Monto" />
                     </DataTable>
 
-                    <Card title="Balance" className="mt-4">
-                        <p>
-                            Total Ventas: ${data.totals?.sales || 0} <br />
-                            Total Compras: ${data.totals?.purchases || 0} <br />
-                            Total Gastos: ${data.totals?.expenses || 0} <br />
+                    <Card
+                        title="Balance"
+                        className="mt-6 p-4 shadow-lg bg-gradient-to-r from-blue-100 to-blue-50"
+                    >
+                        <div className="flex w-full">
+                            <p className="text-xl font-semibold">
+                                Total Ventas:
+                            </p>
+                            <p className="text-green-600 text-xl text-center font-semibold w-[90%]">
+                                ${formatCurrency(data.totals?.sales)}
+                            </p>
+                        </div>
+                        <div className="flex w-full justify-between">
+                            <p className="text-xl font-semibold">
+                                Total Compras:
+                            </p>
+                            <p className="text-orange-600 text-xl text-end font-semibold">
+                                ${formatCurrency(data.totals?.purchases)}
+                            </p>
+                        </div>
+                        <div className="flex w-full justify-between">
+                            <p className="text-xl font-semibold">
+                                Total Gastos:
+                            </p>
+                            <p className="text-red-600 text-xl text-end font-semibold">
+                                ${formatCurrency(data.totals?.expenses)}
+                            </p>
+                        </div>
+                        <p className="text-xl font-bold text-[#0d47a1] text-center">
                             <strong>Balance: ${calculateBalance()}</strong>
                         </p>
                     </Card>

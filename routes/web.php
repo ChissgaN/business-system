@@ -84,7 +84,7 @@ Route::middleware('auth')->group(function(){
 });
 
 Route::middleware('auth')->group(function(){
-    Route::get('/balance', [BalanceController::class, 'index'])->name('balance.getBalance');
+    Route::get('/balance', [BalanceController::class, 'index'])->name('balance.index');
 });
 
 require __DIR__.'/auth.php';
