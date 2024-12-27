@@ -92,10 +92,12 @@ export default function StoreProductSale({
                     </label>
                     <Dropdown
                         value={newProduct.product_id}
-                        options={products.map((product) => ({
-                            label: product.name,
-                            value: product.id,
-                        }))}
+                        options={products
+                            .filter((product) => product.qty > 0) // Filtrar productos con qty > 0
+                            .map((product) => ({
+                                label: product.name,
+                                value: product.id,
+                            }))}
                         onChange={(e) => {
                             const product = products.find(
                                 (p) => p.id === e.value
@@ -205,12 +207,12 @@ export default function StoreProductSale({
                             />
                         </DataTable>
                         <div className="w-full flex justify-center items-center ">
-                        <Button
-                            label="Guardar Productos"
-                            onClick={handleSaveProducts}
-                            disabled={processing}
-                            className="mt-4 w-1/3 bg-[#007bff] text-white p-2 rounded-md"
-                        />
+                            <Button
+                                label="Guardar Productos"
+                                onClick={handleSaveProducts}
+                                disabled={processing}
+                                className="mt-4 w-1/3 bg-[#007bff] text-white p-2 rounded-md"
+                            />
                         </div>
                     </div>
                 )}
