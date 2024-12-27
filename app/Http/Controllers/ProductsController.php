@@ -24,6 +24,13 @@ class ProductsController extends Controller
         }
     }
 
+    public function getStockProducts()
+    {
+        $products = Products::orderBy('qty', 'asc')->get();
+        return response()->json($products);
+    }
+
+
     /**
      * Show the form for creating a new resource.
      */
@@ -56,9 +63,7 @@ class ProductsController extends Controller
     /**
      * Show the form for editing the specified resource.
      */
-    public function edit(Products $product)
-    {
-    }
+    public function edit(Products $product) {}
 
     /**
      * Update the specified resource in storage.

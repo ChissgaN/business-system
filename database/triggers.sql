@@ -103,19 +103,23 @@ BEGIN
     DECLARE current_stock INT;
     DECLARE quantity_difference INT;
 
+    -- Obtener el stock actual del producto
     SELECT qty INTO current_stock 
     FROM products 
     WHERE id = NEW.product_id 
     FOR UPDATE;
 
-    SET quantity_difference = OLD.qty - NEW.qty;
+    -- Calcular la diferencia de cantidad entre OLD y NEW
+    SET quantity_difference = NEW.qty - OLD.qty;
 
+    -- Ajustar el stock según la diferencia
     UPDATE products 
-    SET qty = (current_stock + quantity_difference) 
+    SET qty = current_stock - quantity_difference
     WHERE id = NEW.product_id;
 END;
 //
 DELIMITER ;
+
 
 DROP TRIGGER IF EXISTS after_product_sales_delete;
 DELIMITER //
