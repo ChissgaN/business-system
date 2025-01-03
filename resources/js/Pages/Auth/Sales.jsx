@@ -94,7 +94,7 @@ export default function Sales({
     };
     const formatDate = (dateString) => {
         const date = new Date(dateString);
-        return date.toLocaleDateString("es-ES"); // Formato: "dd/mm/yyyy"
+        return date.toLocaleDateString("es-ES"); 
     };
     return (
         <AuthenticatedLayout>
@@ -142,8 +142,7 @@ export default function Sales({
                     )}
                 </div>
                 {/* Main DataTable */}
-                <DataTable value={sales} paginator rows={5} header="Listado de Ventas"
-                rowClassName={(rowData) => (rowData.id % 2 === 0 ? 'bg-gray-800 text-white' : 'bg-gray-400 text-gray-700')}>
+                <DataTable value={sales} paginator rows={5} header="Listado de Ventas" >
                     <Column field="id" header="ID" sortable />
                     <Column field="user.name" header="Usuario" sortable />
                     <Column field="document_date" header="Fecha" sortable body={(rowData) => formatDate(rowData.document_date)}/>

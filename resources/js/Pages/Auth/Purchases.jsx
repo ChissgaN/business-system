@@ -54,7 +54,11 @@ export default function Purchases({
     const actionBodyTemplate = (rowData) => {
         const handleView = (purchase) => {
             axios
-                .get(route("purchase-products.index", { purchase_id: purchase.id }))
+                .get(
+                    route("purchase-products.index", {
+                        purchase_id: purchase.id,
+                    })
+                )
                 .then((response) => {
                     const { purchase, purchaseProducts } = response.data;
                     setSelectedPurchase(purchase); // Detalles de la compra
@@ -66,7 +70,7 @@ export default function Purchases({
                 });
         };
         // Form states
-        
+
         const handleProducts = (purchase) => {
             setSelectedPurchase(purchase);
             setVisibleProductsModal(true);
@@ -84,14 +88,17 @@ export default function Purchases({
             setVisibleEditModal(true); // Mostrar modal de edición
         };
         const handleDelete = (purchase) => {
-            Inertia.delete(route("purchases.destroy", { purchase: purchase.id }), {
-                onSuccess: () => {
-                    console.log("Compra eliminada exitosamente");
-                },
-                onError: (errors) => {
-                    console.error("Error al eliminar la compra:", errors);
-                },
-            });
+            Inertia.delete(
+                route("purchases.destroy", { purchase: purchase.id }),
+                {
+                    onSuccess: () => {
+                        console.log("Compra eliminada exitosamente");
+                    },
+                    onError: (errors) => {
+                        console.error("Error al eliminar la compra:", errors);
+                    },
+                }
+            );
         };
         return (
             <FourActionButtons
@@ -144,20 +151,30 @@ export default function Purchases({
                     )}
                     {visibleEditModal && (
                         <EditPurchases
-                            visible={visibleEditModal} 
-                            onHide={() => setVisibleEditModal(false)} 
-                            purchase={selectedPurchase} 
-                            purchaseProducts={purchaseProducts.products} 
+                            visible={visibleEditModal}
+                            onHide={() => setVisibleEditModal(false)}
+                            purchase={selectedPurchase}
+                            purchaseProducts={purchaseProducts.products}
                             users={users}
                         />
                     )}
                 </div>
                 {/* Main DataTable */}
-                <DataTable value={purchases} paginator rows={5} header="Listado de Compras"
-                rowClassName={(rowData) => (rowData.id % 2 === 0 ? 'bg-gray-800 text-white' : 'bg-gray-400 text-gray-700')}>
+                <DataTable
+                    value={purchases}
+                    paginator
+                    rows={5}
+                    header="Listado de Compras"
+                    
+                >
                     <Column field="id" header="ID" sortable />
                     <Column field="user.name" header="Usuario" sortable />
-                    <Column field="document_date" header="Fecha" sortable body={(rowData) => formatDate(rowData.document_date)}/>
+                    <Column
+                        field="document_date"
+                        header="Fecha"
+                        sortable
+                        body={(rowData) => formatDate(rowData.document_date)}
+                    />
                     <Column
                         field="total"
                         header="Total"
@@ -188,6 +205,7 @@ export default function Purchases({
                     />
                     <Column header="Acciones" body={actionBodyTemplate} />
                 </DataTable>
+
                 {visibleProductsModal && (
                     <StorePurchaseProduct
                         visible={visibleProductsModal}

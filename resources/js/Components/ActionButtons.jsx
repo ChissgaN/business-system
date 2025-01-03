@@ -9,7 +9,7 @@ export default function FourActionButtons({ rowData, onView, onProducts, onEdit,
     const handleDelete = () => onDelete(rowData);
 
     return (
-        <div className="flex space-x-2">
+        <div className="flex space-x-2 text-xl">
             <Button
                 icon={<FaEye />}
                 className="p-button-rounded p-button-info text-green-700"

@@ -38,7 +38,6 @@ const BillsPurchasesProducts = ({
                 <DataTable
                     value={purchaseProducts}
                     className="mt-4"
-                    rowClassName={(rowData ) => (rowData.id % 2 === 0 ? 'bg-gray-800 text-white' : 'bg-gray-400 text-gray-700')}
                     tableStyle={{ minWidth: "38rem" }}
                     paginator rows={4}
                 >
