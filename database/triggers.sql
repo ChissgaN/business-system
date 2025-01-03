@@ -7,10 +7,10 @@ BEGIN
     DECLARE current_stock INT;
 
     IF NEW.received = 1 THEN
+
         SELECT qty INTO current_stock 
         FROM products 
-        WHERE id = NEW.product_id 
-        FOR UPDATE;
+        WHERE id = NEW.product_id;
 
         UPDATE products 
         SET qty = (current_stock + NEW.qty) 
@@ -19,6 +19,7 @@ BEGIN
 END;
 //
 DELIMITER ;
+
 
 DROP TRIGGER IF EXISTS after_purchase_products_update;
 DELIMITER //
@@ -72,6 +73,8 @@ BEGIN
 
     UPDATE products 
     SET qty = (current_stock - OLD.qty)
+//
+DELIMITER ;
 
 
 DROP TRIGGER IF EXISTS after_product_sales_insert;
