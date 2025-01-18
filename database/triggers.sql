@@ -35,19 +35,27 @@ BEGIN
     WHERE id = NEW.product_id 
     FOR UPDATE;
 
-    -- Caso 1: `received` cambia de 0 a 1
+    -- Caso 1: `received` cambia de 0 a 1 (confirmación de recepción)
     IF OLD.received <> 1 AND NEW.received = 1 THEN
         UPDATE products 
         SET qty = current_stock + NEW.qty
         WHERE id = NEW.product_id;
 
-    -- Caso 2: `received` es 1 y se actualiza `qty`
+    -- Caso 2: `received` es 1 y `qty` en `purchase_products` cambia
     ELSEIF OLD.received = 1 AND NEW.received = 1 THEN
-        UPDATE products 
-        SET qty = current_stock + (OLD.qty - NEW.qty)
-        WHERE id = NEW.product_id;
+        IF NEW.qty > OLD.qty THEN
+            -- Si la nueva cantidad es mayor, aumenta el stock
+            UPDATE products 
+            SET qty = current_stock + (NEW.qty - OLD.qty)
+            WHERE id = NEW.product_id;
+        ELSEIF NEW.qty < OLD.qty THEN
+            -- Si la nueva cantidad es menor, reduce el stock
+            UPDATE products 
+            SET qty = current_stock - (OLD.qty - NEW.qty)
+            WHERE id = NEW.product_id;
+        END IF;
 
-    -- Caso 3: `received` cambia de 1 a otro valor
+    -- Caso 3: `received` cambia de 1 a otro valor (se anula la recepción)
     ELSEIF OLD.received = 1 AND NEW.received <> 1 THEN
         UPDATE products 
         SET qty = current_stock - OLD.qty
@@ -56,6 +64,7 @@ BEGIN
 END;
 //
 DELIMITER ;
+
 
 
 DROP TRIGGER IF EXISTS after_purchase_products_delete;
