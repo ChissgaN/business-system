@@ -18,7 +18,7 @@ export default function Products({ products }) {
     const [visibleEditModal, setVisibleEditModal] = useState(false);
     const [visibleDeleteModal, setVisibleDeleteModal] = useState(false);
     const [selectedProduct, setSelectedProduct] = useState(null);
-    const [newProduct, setNewProduct] = useState({ name: '', description: '', cost: '', price: '', qty: '' });
+    const [newProduct, setNewProduct] = useState({ name: '', description: '', cost: '', price: '', qty: 0 });
     const [searchTerm, setSearchTerm] = useState('');
 
     const actionBodyTemplate = (rowData) => {

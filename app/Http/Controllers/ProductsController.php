@@ -49,7 +49,7 @@ class ProductsController extends Controller
             'description' => 'required|string|max:255',
             'cost' => 'required|numeric',
             'price' => 'required|numeric',
-            'qty' => 'required|integer|min:1',
+            'qty' => 'required|integer|min:0',
         ]);
 
         try {
@@ -75,7 +75,7 @@ class ProductsController extends Controller
             'description' => 'required|string|max:255',
             'cost' => 'required|numeric',
             'price' => 'required|numeric',
-            'qty' => 'required|integer|min:1',
+            'qty' => 'required|integer|min:0',
         ]);
 
         try {
